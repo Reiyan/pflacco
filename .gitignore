@@ -1,2 +1,5 @@
-pflacco_venv/
 .vscode/
+build/
+dist/
+pflacco_venv/
+pflacco.egg-info/

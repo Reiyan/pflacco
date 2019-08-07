@@ -4,7 +4,6 @@ with open("README.md", "r") as fh:
 setuptools.setup(
      name='pflacco',  
      version='0.1',
-     scripts=['pflacco'] ,
      author="Raphael Patrick Prager",
      author_email="raphael.prager@gmx.de",
      description="An python interface to the R package flacco for computing ELA features.",
