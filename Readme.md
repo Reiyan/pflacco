@@ -2,6 +2,15 @@
 
 ## Summary
 Feature-based landscape analysis of continuous and constrained optimization problems is now available in Python as well.
+This package provides a python interface to the R package [flacco](https://github.com/kerschke/flacco) by Pascal Kerschke.
+The following is the description of the original flacco package:
+> flacco is a collection of features for Explorative Landscape Analysis (ELA) of single-objective, continuous (Black-Box-)Optimization Problems. It allows the user to quantify characteristics of an (unknown) optimization problem's landscape.
+
+> Features, which used to be spread over different packages and platforms (R, Matlab, python, etc.), are now combined within this single package. Amongst others, this package contains feature sets, such as ELA, Information Content, Dispersion, (General) Cell Mapping or Barrier Trees.
+
+> Furthermore, the package provides a unified interface for all features -- using a so-called feature object and (if required) control arguments. In total, the current release (1.7) consists of 17 different feature sets, which sum up to approximately 300 features.
+
+> In addition to the features themselves, this package also provides visualizations, e.g. of the cell mappings, barrier trees or information content
 
 
 ## Quickstart
@@ -21,16 +30,13 @@ obj_values = objective_function(sample, 2)
 feat_object = create_feature_object(sample, obj_values, blocks=3)
 
 # Calculate a single feature set
-cm_angle = calculate_feature_set(feat_object, 'cm_angle')
+cm_angle_features = calculate_feature_set(feat_object, 'cm_angle')
 print(cm_angle)
 
 # Calculate all features
 ela_features = calculate_features(feat_object)
 print(ela_features)
 ```
+
 ## Setup
-
-
-This is a simple example package. You can use
-[Github-flavored Markdown](https://guides.github.com/features/mastering-markdown/)
-to write your content.
+Easy as 
