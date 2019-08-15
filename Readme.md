@@ -44,3 +44,5 @@ ela_features = calculate_features(feat_object)
 print(ela_features)
 ```
 
+## Contact
+I endorse and appreciate every comment and participation. Feel free to contact me under raphael.prager@uni-muenster.de
