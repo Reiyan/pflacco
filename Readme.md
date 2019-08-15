@@ -37,7 +37,7 @@ feat_object = create_feature_object(sample, obj_values, blocks=3)
 
 # Calculate a single feature set
 cm_angle_features = calculate_feature_set(feat_object, 'cm_angle')
-print(cm_angle)
+print(cm_angle_features)
 
 # Calculate all features
 ela_features = calculate_features(feat_object)
