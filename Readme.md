@@ -1,5 +1,5 @@
 # pflacco: A Python Interface of the R Package flacco
-* *If you like this package, please [star](https://github.com/blog/1204-notifications-stars) it on Github.*
+For people who are not comfortable with R.
 
 ## Summary
 Feature-based landscape analysis of continuous and constrained optimization problems is now available in Python as well.
