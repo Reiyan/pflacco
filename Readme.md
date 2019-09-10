@@ -14,7 +14,7 @@ The following is the description of the original flacco package:
 > In addition to the features themselves, this package also provides visualizations, e.g. of the cell mappings, barrier trees or information content
 
 ## Prerequisites
-For a stable (and tested) outcome, pflacco requires at least Python>=3.6.4 and R>=3.6.1
+For a stable (and tested) outcome, pflacco requires at least [Python>=3.6.4](https://www.python.org/downloads/release/python-364/) and [R>=3.6.1](https://cran.uni-muenster.de)
 
 ## Setup
 Easy as it usually is in Python:
