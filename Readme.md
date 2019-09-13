@@ -13,6 +13,7 @@ The following is the description of the original flacco package:
 >
 > In addition to the features themselves, this package also provides visualizations, e.g. of the cell mappings, barrier trees or information content
 
+The calculation procedure and further background information of ELA features is given in [Comprehensive Feature-Based Landscape Analysis of Continuous and Constrained Optimization Problems Using the R-Package flacco](https://arxiv.org/abs/1708.05258).
 ## Prerequisites
 For a stable (and tested) outcome, pflacco requires at least [Python>=3.6.4](https://www.python.org/downloads/release/python-364/) and [R>=3.6.1](https://cran.uni-muenster.de)
 
