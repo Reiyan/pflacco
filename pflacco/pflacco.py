@@ -9,7 +9,7 @@ import numpy as np
 base = importr('base')
 utils = importr('utils')
 utils.chooseCRANmirror(ind=1)
-packnames = ['flacco', 'dplyr', 'lhs', 'expm', 'mlbench', 'numDeriv', 'shape', 'shiny', 'testthat', 'RANN', 'mda']
+packnames = ['flacco', 'dplyr', 'lhs', 'expm', 'mlbench', 'numDeriv', 'shape', 'shiny', 'testthat', 'RANN', 'mda', 'e1071']
 names_to_install = [x for x in packnames if not rpackages.isinstalled(x)]
 if len(names_to_install) > 0:
     utils.install_packages(StrVector(names_to_install))
