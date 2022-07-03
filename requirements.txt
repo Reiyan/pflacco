@@ -1,2 +1,5 @@
-numpy>=1.17.0
-rpy2>=3.0.5
+numpy>=1.20.0
+sklearn>=0.24.1
+pyDOE>=0.3.8
+scipy
+SALib

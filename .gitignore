@@ -2,5 +2,8 @@
 .DS_Store
 build/
 dist/
-pflacco_venv/
+venv/
 pflacco.egg-info/
+.RData
+.Rhistory
+*.csv
