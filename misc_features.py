@@ -17,14 +17,17 @@ def calculate_hill_climbing_features(f, dim, lower_bound, upper_bound, n_runs = 
 
       opt_result, nfvals = _create_local_search_sample(f, dim, lower_bound, upper_bound, n_runs = n_runs, budget_factor_per_run=budget_factor_per_run, method = method, minimize = minimize, seed = seed)
 
-      cdist_mat = pdist(opt_result, metric='minkowski', p = minkowski_p)
+      cdist_mat = pdist(opt_result[:, :dim], metric='minkowski', p = minkowski_p)
       dist_mean = cdist_mat.mean()
       dist_std = cdist_mat.std(ddof = 1)
 
       dist_mat = squareform(cdist_mat)
       best_optimum_idx = opt_result[:, dim] == opt_result[: , dim].min()
-      dist_global_local_mean = dist_mat[best_optimum_idx, :].mean()
-      dist_global_local_std = dist_mat[best_optimum_idx, :].std(ddof = 1)
+      
+      # In case of multiple global optima, the distance to the nearest global optima is taken.
+      tie_breaker_dist_mat = np.array([dist_mat[best_optimum_idx, x].min() for x in range(dist_mat.shape[1])])
+      dist_global_local_mean = tie_breaker_dist_mat.mean()
+      dist_global_local_std = tie_breaker_dist_mat.std(ddof = 1)
 
       return {
             'hill_climbing.avg_dist_between_opt': dist_mean,
@@ -220,10 +223,11 @@ def calculate_sobol_indices_features(f, dim, lower_bound, upper_bound, sampling_
                   d_b_set.append(d_b_j.mean())
             
       d_b_set = np.array(d_b_set)
-      d_b_j_set = np.hstack(np.array(d_b_j_set))
+      d_b_j_set = np.hstack(d_b_j_set)
       obs_per_bin = np.array(obs_per_bin)
 
-      d_distribution = np.hstack(np.array([np.array([d_b_set[i]] * obs_per_bin[i]) for i in range(n_bins)]))
+      d_distribution = np.hstack([np.array([d_b_set[i]] * obs_per_bin[i]) for i in range(n_bins)])
+
       u_2_d = d_distribution.var()
 
       ## C. Fitness- and State Skewness

@@ -7,3 +7,4 @@ pflacco.egg-info/
 .RData
 .Rhistory
 *.csv
+*.pyc

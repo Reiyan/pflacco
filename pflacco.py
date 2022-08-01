@@ -15,10 +15,11 @@ from pflacco_utils import _transform_bounds_to_canonical, _validate_variable_typ
 from sampling import _create_local_search_sample, create_initial_sample, _levy_random_walk
 from classical_ela_features import *
 from local_optima_network_features import *
+from misc_features import *
 
 allowed_ela_features = ['limo', 'ela_meta', 'ela_level', 'ela_distr', 'disp', 'ic', 'pca', 'nbc', 'fd']
 
-
+'''
 def calculate_hill_climbing_features(f, dim, lower_bound, upper_bound, n_runs = 100, budget_factor_per_run = 1000, method = 'L-BFGS-B', minimize = True, seed = None, minkowski_p = 2):
       start_time = time.monotonic()
       lower_bound, upper_bound = _transform_bounds_to_canonical(dim, lower_bound, upper_bound)
@@ -266,7 +267,7 @@ def calculate_sobol_indices_features(f, dim, lower_bound, upper_bound, sampling_
             'fla_metrics.additional_function_eval' : sampling_coefficient * (dim + 2),
             'fla_metrics.costs_runtime': timedelta(seconds=time.monotonic() - start_time).total_seconds()
       }
-
+'''
 def calculate_features(X, y, lower_bound, upper_bound, features = [], blocks = None,  minimize = True):
       
       if (not isinstance(features, list) and type(blocks) is not np.ndarray) or len(features) == 0:
@@ -315,6 +316,7 @@ f = bbobbenchmarks.instantiate(3, iinstance=1)[0]
 X = create_initial_sample(5, n = 500, lower_bound = -5, upper_bound = 5, sample_type = 'lhs')
 y = X.apply(lambda x: f(x.values), axis = 1)
 #result = calculate_sobol_indices_features(test_obj, 10, -5, 5, seed = 100)
+'''
 grad = calculate_gradient_features(f, 5, -5, 5, seed = 100)
 
 hc = calculate_hill_climbing_features(f, 5, -5, 5, seed = 100)
@@ -334,9 +336,10 @@ cm_conv = calculate_cm_conv(X, y, -5, 5, blocks = 3)
 cm_grad = calculate_cm_grad(X, y, -5, 5, blocks = 3)
 ela_conv = calculate_ela_conv(X, y, f)
 ela_level = calculate_ela_level(X, y)
+
 ela_curvate = calculate_ela_curvate(X, y, f, 5, -5, 5)
 ela_local = calculate_ela_local(X, y, f, 5, -5, 5)
-
+'''
 nodes, edges = compute_local_optima_network(f, 5, -5, 5)
 lon = compute_lon_features(nodes, edges)
 print('test')

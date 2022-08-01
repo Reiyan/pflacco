@@ -104,7 +104,7 @@ def compute_local_optima_network(f, dim, lower_bound, upper_bound, random_seed =
         minimizer_kwargs = {
             'method': 'L-BFGS-B',
             'options': {
-                'maxiter': 15000,
+                'maxiter': 150,
                 'ftol': 1e-7
             }
         }
