@@ -18,6 +18,8 @@ from scipy.stats import gaussian_kde
 from scipy.optimize import minimize as scipy_minimize
 from scipy.cluster.hierarchy import linkage, cut_tree, _order_cluster_tree
 
+from typing import Callable, Dict, List, Optional, Union
+
 from pflacco_utils import _determine_max_n_blocks, _create_blocks, _validate_variable_types, _transform_bounds_to_canonical, _check_blocks_variable, _cartesian_product_efficient
 
 
@@ -45,7 +47,10 @@ def _calculate_num_derivate(f, lower_bound, upper_bound, delta, eps, zero_tol, r
       
       return np.array([gr_scale_norm, gr_scale, hess_cond])
 
-def calculate_ela_meta(X, y):
+def calculate_ela_meta(
+      X: Union[pd.DataFrame, np.ndarray, List[List[float]]],
+      y: Union[pd.Series, np.ndarray, List[float]]) -> Dict[str, Union[int, float]]:
+
       start_time = time.monotonic()
 
       X, y = _validate_variable_types(X, y)
@@ -113,7 +118,14 @@ def calculate_ela_meta(X, y):
             'ela_meta.costs_runtime': timedelta(seconds=time.monotonic() - start_time).total_seconds()
       }
 
-def calculate_pca(X, y, prop_cov_x = 0.9, prop_cor_x = 0.9, prop_cov_init = 0.9, prop_cor_init = 0.9):
+def calculate_pca(
+      X: Union[pd.DataFrame, np.ndarray, List[List[float]]],
+      y: Union[pd.Series, np.ndarray, List[float]],
+      prop_cov_x: float = 0.9,
+      prop_cor_x: float = 0.9,
+      prop_cov_init: float = 0.9,
+      prop_cor_init: float = 0.9) -> Dict[str, Union[int, float]]:
+
       start_time = time.monotonic()
       X, y = _validate_variable_types(X, y)
 
@@ -174,7 +186,13 @@ def calculate_pca(X, y, prop_cov_x = 0.9, prop_cor_x = 0.9, prop_cov_init = 0.9,
           'pca.costs_runtime': timedelta(seconds=time.monotonic() - start_time).total_seconds()
       }
 
-def calculate_nbc(X, y, fast_k = 0.05, dist_tie_breaker = 'sample', minimize = True):
+def calculate_nbc(
+      X: Union[pd.DataFrame, np.ndarray, List[List[float]]],
+      y: Union[pd.Series, np.ndarray, List[float]],
+      fast_k: float = 0.05,
+      dist_tie_breaker: str = 'sample',
+      minimize: bool = True) -> Dict[str, Union[int, float]]:
+
       start_time = time.monotonic()
       X, y = _validate_variable_types(X, y)
 
@@ -245,7 +263,14 @@ def calculate_nbc(X, y, fast_k = 0.05, dist_tie_breaker = 'sample', minimize = T
             'nbc.costs_runtime': timedelta(seconds=time.monotonic() - start_time).total_seconds()
       }
 
-def calculate_dispersion(X, y, disp_quantiles = [0.02, 0.05, 0.1, 0.25], dist_method = 'euclidean', dist_p = 2, minimize = True):
+def calculate_dispersion(
+      X: Union[pd.DataFrame, np.ndarray, List[List[float]]],
+      y: Union[pd.Series, np.ndarray, List[float]],
+      disp_quantiles: List[float] = [0.02, 0.05, 0.1, 0.25],
+      dist_method: str = 'euclidean',
+      dist_p: int = 2,
+      minimize: bool = True) -> Dict[str, Union[int, float]]:
+
       start_time = time.monotonic()
       X, y = _validate_variable_types(X, y)
 
@@ -286,8 +311,17 @@ def calculate_dispersion(X, y, disp_quantiles = [0.02, 0.05, 0.1, 0.25], dist_me
       result['disp.costs_runtime'] = timedelta(seconds=time.monotonic() - start_time).total_seconds()
       return result
 
-def calculate_information_content(X, y, ic_sorting = 'nn', ic_nn_neighborhood = 20, ic_nn_start = None,\
-      ic_epsilon = np.insert(10 ** np.linspace(start = -5, stop = 15, num = 1000), 0, 0), ic_settling_sensitivity = 0.05, ic_info_sensitivity = 0.5, ic_seed = None):
+def calculate_information_content(
+      X: Union[pd.DataFrame, np.ndarray, List[List[float]]],
+      y: Union[pd.Series, np.ndarray, List[float]],
+      ic_sorting: str = 'nn',
+      ic_nn_neighborhood: int = 20,
+      ic_nn_start: Optional[int] = None,
+      ic_epsilon: List[float] = np.insert(10 ** np.linspace(start = -5, stop = 15, num = 1000), 0, 0),
+      ic_settling_sensitivity: float = 0.05,
+      ic_info_sensitivity: float = 0.5,
+      seed: Optional[int] = None) -> Dict[str, Union[int, float]]:
+
       start_time = time.monotonic()
       X, y = _validate_variable_types(X, y)
 
@@ -335,8 +369,8 @@ def calculate_information_content(X, y, ic_sorting = 'nn', ic_nn_neighborhood = 
                   v = v[~index]
 
             
-      if ic_seed is not None and isinstance(ic_seed, int):
-            np.random.seed(ic_seed)
+      if seed is not None and isinstance(seed, int):
+            np.random.seed(seed)
 
       # dist based on ic_sorting
       if ic_sorting == 'random':
@@ -423,7 +457,14 @@ def calculate_information_content(X, y, ic_sorting = 'nn', ic_nn_neighborhood = 
             'ic.costs_runtime': timedelta(seconds=time.monotonic() - start_time).total_seconds()
       }
 
-def calculate_ela_distribution(X, y, ela_distr_smoothing_bandwith = 'SJ', ela_distr_modemass_threshold = 0.01, ela_distr_skewness_type = 3, ela_distr_kurtosis_type = 3):
+def calculate_ela_distribution(
+      X: Union[pd.DataFrame, np.ndarray, List[List[float]]],
+      y: Union[pd.Series, np.ndarray, List[float]],
+      ela_distr_smoothing_bandwith: str = 'SJ',
+      ela_distr_modemass_threshold: float = 0.01,
+      ela_distr_skewness_type: int = 3,
+      ela_distr_kurtosis_type: int = 3) -> Dict[str, Union[int, float]]:
+
       start_time = time.monotonic()
       if ela_distr_skewness_type not in range(1,4):
             raise Exception('Skewness type must be an integer and in the intervall [1,3]')
@@ -484,7 +525,13 @@ def calculate_ela_distribution(X, y, ela_distr_smoothing_bandwith = 'SJ', ela_di
             'ela_distr.costs_runtime': timedelta(seconds=time.monotonic() - start_time).total_seconds()
       }
             
-def calculate_limo(X, y, lower_bound, upper_bound, blocks = None):
+def calculate_limo(
+      X: Union[pd.DataFrame, np.ndarray, List[List[float]]],
+      y: Union[pd.Series, np.ndarray, List[float]],
+      lower_bound: Union[List[float], float],
+      upper_bound: Union[List[float], float],
+      blocks: Optional[Union[List[int], np.ndarray, int]] = None) -> Dict[str, Optional[Union[int, float]]]:
+
       start_time = time.monotonic()
       X, y = _validate_variable_types(X, y)
       dims = X.shape[1]
@@ -552,7 +599,14 @@ def calculate_limo(X, y, lower_bound, upper_bound, blocks = None):
       return result
 
 # TODO small todo inside function
-def calculate_cm_angle(X, y, lower_bound, upper_bound, blocks = None, minimize = True):
+def calculate_cm_angle(
+      X: Union[pd.DataFrame, np.ndarray, List[List[float]]],
+      y: Union[pd.Series, np.ndarray, List[float]],
+      lower_bound: Union[List[float], float],
+      upper_bound: Union[List[float], float],
+      blocks: Optional[Union[List[int], np.ndarray, int]] = None,
+      minimize: bool = True) -> Dict[str, Union[int, float]]:
+
       start_time = time.monotonic()
       X, y = _validate_variable_types(X, y)
       dim = X.shape[1]
@@ -615,7 +669,16 @@ def calculate_cm_angle(X, y, lower_bound, upper_bound, blocks = None, minimize =
             'cm_angle.costs_runtime': timedelta(seconds=time.monotonic() - start_time).total_seconds()
       }
 
-def calculate_cm_conv(X, y, lower_bound, upper_bound, blocks = None, minimize = True, cm_conv_diag = False,  cm_conv_fast_k = 0.05):
+def calculate_cm_conv(
+      X: Union[pd.DataFrame, np.ndarray, List[List[float]]],
+      y: Union[pd.Series, np.ndarray, List[float]],
+      lower_bound: Union[List[float], float],
+      upper_bound: Union[List[float], float],
+      blocks: Optional[Union[List[int], np.ndarray, int]] = None,
+      minimize: bool = True,
+      cm_conv_diag: bool = False,
+      cm_conv_fast_k: float = 0.05) -> Dict[str, Union[int, float]]:
+
       start_time = time.monotonic()
       X, y = _validate_variable_types(X, y)
       dim = X.shape[1]
@@ -746,7 +809,16 @@ def calculate_cm_conv(X, y, lower_bound, upper_bound, blocks = None, minimize = 
             'cm_conv.costs_runtime': timedelta(seconds=time.monotonic() - start_time).total_seconds()
       }
 
-def calculate_cm_grad(X, y, lower_bound, upper_bound, blocks = None, minimize = True, cm_conv_diag = False,  cm_conv_fast_k = 0.05):
+def calculate_cm_grad(
+      X: Union[pd.DataFrame, np.ndarray, List[List[float]]],
+      y: Union[pd.Series, np.ndarray, List[float]],
+      lower_bound: Union[List[float], float],
+      upper_bound: Union[List[float], float],
+      blocks: Optional[Union[List[int], np.ndarray, int]] = None,
+      minimize: bool = True,
+      cm_conv_diag: bool = False,
+      cm_conv_fast_k: float = 0.05) -> Dict[str, Union[int, float]]:
+
       start_time = time.monotonic()
       X, y = _validate_variable_types(X, y)
       dim = X.shape[1]
@@ -789,7 +861,13 @@ def calculate_cm_grad(X, y, lower_bound, upper_bound, blocks = None, minimize = 
             'cm_grad.costs_runtime': timedelta(seconds=time.monotonic() - start_time).total_seconds()
       }
 
-def calculate_ela_conv(X, y, fun, ela_conv_nsample = 1000, ela_conv_threshold = 1e-10):
+def calculate_ela_conv(
+      X: Union[pd.DataFrame, np.ndarray, List[List[float]]],
+      y: Union[pd.Series, np.ndarray, List[float]],
+      f: Callable[[List[float]], float],
+      ela_conv_nsample: int = 1000,
+      ela_conv_threshold: float = 1e-10) -> Dict[str, Union[int, float]]:
+
       start_time = time.monotonic()
       X, y = _validate_variable_types(X, y)
       delta = []
@@ -799,7 +877,7 @@ def calculate_ela_conv(X, y, fun, ela_conv_nsample = 1000, ela_conv_threshold = 
             wt = np.random.uniform(size = 1)[0]
             wt = np.array([wt, 1 - wt])
             xn = np.matmul(wt, X.iloc[i].to_numpy())
-            delta.append(fun(xn) - np.matmul(y.iloc[i], wt))
+            delta.append(f(xn) - np.matmul(y.iloc[i], wt))
             nfev += 1
             
       delta = np.array(delta)
@@ -814,7 +892,13 @@ def calculate_ela_conv(X, y, fun, ela_conv_nsample = 1000, ela_conv_threshold = 
       }
 
 # TODO mda missing
-def calculate_ela_level(X, y, ela_level_quantiles = [0.1, 0.25, 0.5], interface_mda_from_R = False, ela_level_resample_iterations = 10):
+def calculate_ela_level(
+      X: Union[pd.DataFrame, np.ndarray, List[List[float]]],
+      y: Union[pd.Series, np.ndarray, List[float]],
+      ela_level_quantiles: List[float] = [0.1, 0.25, 0.5],
+      interface_mda_from_R: bool = False,
+      ela_level_resample_iterations: int = 10) -> Dict[str, Union[int, float]]:
+
       start_time = time.monotonic()
       X, y = _validate_variable_types(X, y)
       mda_mmce = []
@@ -888,7 +972,21 @@ def calculate_ela_level(X, y, ela_level_quantiles = [0.1, 0.25, 0.5], interface_
       result['ela_level.costs_runtime'] = timedelta(seconds=time.monotonic() - start_time).total_seconds()
       return result
 
-def calculate_ela_curvate(X, y, f, dim, lower_bound, upper_bound, sample_size_factor = 100, delta = 10**-4, eps = 10**-4, zero_tol = np.sqrt(np.nextafter(0, 1)/70**-7), r = 4, v = 2, seed = None):
+def calculate_ela_curvate(
+      X: Union[pd.DataFrame, np.ndarray, List[List[float]]],
+      y: Union[pd.Series, np.ndarray, List[float]],
+      f: Callable[[List[float]], float],
+      dim: int,
+      lower_bound: Union[List[float], float],
+      upper_bound: Union[List[float], float],
+      sample_size_factor: int = 100,
+      delta: float = 10**-4,
+      eps: float = 10**-4,
+      zero_tol: float = np.sqrt(np.nextafter(0, 1)/70**-7),
+      r: int = 4,
+      v: int = 2,
+      seed: Optional[int] = None) -> Dict[str, Union[int, float]]:
+
       start_time = time.monotonic()
 
       X, y = _validate_variable_types(X, y)
@@ -941,7 +1039,20 @@ def calculate_ela_curvate(X, y, f, dim, lower_bound, upper_bound, sample_size_fa
             'ela_curv.costs_runtime': timedelta(seconds=time.monotonic() - start_time).total_seconds()
       }
 
-def calculate_ela_local(X, y, f, dim, lower_bound, upper_bound, minimize = True, ela_local_local_searches_factor = 50, ela_local_optim_method = 'L-BFGS-B', ela_local_clust_method = 'single', seed = None, **minimizer_kwargs):
+def calculate_ela_local(
+      X: Union[pd.DataFrame, np.ndarray, List[List[float]]],
+      y: Union[pd.Series, np.ndarray, List[float]],
+      f: Callable[[List[float]], float],
+      dim: int,
+      lower_bound: Union[List[float], float],
+      upper_bound: Union[List[float], float],
+      minimize: bool = True,
+      ela_local_local_searches_factor: int = 50,
+      ela_local_optim_method: str = 'L-BFGS-B',
+      ela_local_clust_method: str = 'single',
+      seed: Optional[int] = None,
+      **minimizer_kwargs) -> Dict[str, Union[int, float]]:
+
       start_time = time.monotonic()
       X, y = _validate_variable_types(X, y)
       lower_bound, upper_bound = _transform_bounds_to_canonical(dim, lower_bound, upper_bound)
@@ -1004,4 +1115,3 @@ def calculate_ela_local(X, y, f, dim, lower_bound, upper_bound, minimize = True,
             'ela_local.costs_runtime': timedelta(seconds=time.monotonic() - start_time).total_seconds()
 
       }
-

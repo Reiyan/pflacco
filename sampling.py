@@ -5,12 +5,40 @@ from pyDOE import lhs
 from SALib.sample import sobol_sequence
 from scipy.stats import levy
 from scipy.optimize import minimize as scipy_minimize
+from typing import List, Optional, Union
 
 from pflacco_utils import _transform_bounds_to_canonical
 
-def create_initial_sample(dim, n = None, sample_coefficient = 50, lower_bound = 0, upper_bound = 1, sample_type = 'lhs'):
+def create_initial_sample(
+      dim: int,
+      n: Optional[int] = None,
+      sample_coefficient: int = 50,
+      lower_bound: Union[List[float], float] = 0,
+      upper_bound: Union[List[float], float] = 1,
+      sample_type: str = 'lhs') -> pd.DataFrame:
+      """_summary_
+
+      :param dim: _description_
+      :type dim: int
+      :param n: _description_, defaults to None
+      :type n: Optional[int], optional
+      :param sample_coefficient: _description_, defaults to 50
+      :type sample_coefficient: int, optional
+      :param lower_bound: _description_, defaults to 0
+      :type lower_bound: Union[List[float], float], optional
+      :param upper_bound: _description_, defaults to 1
+      :type upper_bound: Union[List[float], float], optional
+      :param sample_type: _description_, defaults to 'lhs'
+      :type sample_type: str, optional
+      :raises Exception: _description_
+      :raises Exception: _description_
+      :raises Exception: _description_
+      :return: _description_
+      :rtype: pd.DataFrame
+      """      
+
       if sample_type not in ['lhs', 'random', 'sobol']:
-            raise Exception('Unknown sample type selected. Valid options are "lhs" and "random"')
+            raise Exception('Unknown sample type selected. Valid options are "lhs", "sobol", and "random"')
 
       if not isinstance(lower_bound, list) and type(lower_bound) is not np.ndarray:
             lower_bound = np.array([lower_bound] * dim)
@@ -23,7 +51,7 @@ def create_initial_sample(dim, n = None, sample_coefficient = 50, lower_bound = 
             upper_bound = np.array(upper_bound)
 
       if len(lower_bound) != dim or len(upper_bound) != dim:
-            raise Exception('Length of lower-/upperbound is not the same as the problem dimension')
+            raise Exception('Length of lower-/upper bound is not the same as the problem dimension')
       
       if not (lower_bound < upper_bound).all():
             raise Exception('Not all elements of lower bound are smaller than upper bound')
@@ -42,8 +70,6 @@ def create_initial_sample(dim, n = None, sample_coefficient = 50, lower_bound = 
       colnames = ['x' + str(x) for x in range(dim)]
       
       return pd.DataFrame(X, columns = colnames)
-
-
 
 def _create_local_search_sample(f, dim, lower_bound, upper_bound, n_runs = 100, budget_factor_per_run=1000, method = 'L-BFGS-B', minimize = True, seed = None, x0 = None):
     lower_bound, upper_bound = _transform_bounds_to_canonical(dim, lower_bound, upper_bound)
@@ -69,7 +95,6 @@ def _create_local_search_sample(f, dim, lower_bound, upper_bound, n_runs = 100, 
         nfval += opt_result.nfev
 
     return np.array(result), nfval
-
 
 def _levy_random_walk(x, loc = 0, scale = 10**-3):
       

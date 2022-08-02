@@ -1,10 +1,9 @@
-import pandas as pd
-import scipy.optimize as opt
 import numpy as np
+import pandas as pd
 import random
-#import networkx as nx
-#import os
+import scipy.optimize as opt
 
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 from pflacco_utils import _transform_bounds_to_canonical
 
 def _consolidate_edges(edges):
@@ -38,8 +37,6 @@ def _consolide_nodes_same_fitness(nodes, edges, precision = 1e-5):
     edges = edges[~(edges['source'] == edges['target'])]
 
     return result_nodes, edges
-
-
 
 # checks whether x is in the neighbourhood of any node
 def _neighborhood(coord, threshold = 1e-5):
@@ -89,16 +86,27 @@ def create_graph(nodes, edges):
     #nx.drawing.nx_pydot.write_dot(graph, f'lon_results/dot_results/graph_{problem}_{fun_id}_{inst}_{dim}.dot')
 '''
 
-def compute_local_optima_network(f, dim, lower_bound, upper_bound, random_seed = None, logs=False, stepsize = 2, basin_hopping_iteration = 100, stopping_threshold = 1000, minimizer_kwargs = None):
+def compute_local_optima_network(
+    f: Callable[[List[float]], float],
+    dim: int,
+    lower_bound: Union[List[float], float],
+    upper_bound: Union[List[float], float],
+    seed: Optional[int] = None,
+    logs: bool = False,
+    stepsize: int = 2,
+    basin_hopping_iteration: int = 100,
+    stopping_threshold: int = 1000,
+    minimizer_kwargs: Optional[Dict[str, Any]] = None) -> Tuple[pd.DataFrame, pd.DataFrame]:
+
     global nodes, edges, last, restart
     restart = True
     nodes = []
     edges = []
     last = 0
 
-    if random_seed is not None:
-        np.random.seed(random_seed)
-        random.seed(random_seed)
+    if seed is not None:
+        np.random.seed(seed)
+        random.seed(seed)
 
     if minimizer_kwargs is None:
         minimizer_kwargs = {
@@ -123,8 +131,11 @@ def compute_local_optima_network(f, dim, lower_bound, upper_bound, random_seed =
 
     return nodes, edges
 
+def calculate_lon_features(
+    nodes: pd.DataFrame,
+    edges: pd.DataFrame,
+    f_opt: float = None) -> Dict[str, Optional[Union[int, float]]]:
 
-def compute_lon_features(nodes, edges, f_opt = None):
     n_optima = len(nodes)
     neutral = nodes.loc[nodes['neutrality'] > 1, 'neutrality'].sum()/nodes['neutrality'].sum()
     n_funnels = len([x for x in nodes['id'] if x not in edges['source'].unique().tolist()])

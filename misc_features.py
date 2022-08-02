@@ -3,15 +3,26 @@ import pandas as pd
 import time
 
 from datetime import timedelta
-from scipy.spatial.distance import pdist, squareform
-from scipy.stats import gaussian_kde
-from scipy.stats import entropy, moment
 from SALib.analyze import sobol
+from scipy.spatial.distance import pdist, squareform
+from scipy.stats import entropy, gaussian_kde, moment
+from typing import Callable, Dict, List, Optional, Union
 
 from pflacco_utils import _transform_bounds_to_canonical, _validate_variable_types, _determine_max_n_blocks, _check_blocks_variable, _create_blocks
 from sampling import _create_local_search_sample, create_initial_sample, _levy_random_walk
 
-def calculate_hill_climbing_features(f, dim, lower_bound, upper_bound, n_runs = 100, budget_factor_per_run = 1000, method = 'L-BFGS-B', minimize = True, seed = None, minkowski_p = 2):
+def calculate_hill_climbing_features(
+      f: Callable[[List[float]], float],
+      dim: int,
+      lower_bound: Union[List[float], float],
+      upper_bound: Union[List[float], float],
+      n_runs: int = 100,
+      budget_factor_per_run: int = 1000,
+      method: str = 'L-BFGS-B',
+      minimize: bool = True,
+      seed: Optional[int] = None,
+      minkowski_p: int = 2) -> Dict[str, Union[int, float]]:
+
       start_time = time.monotonic()
       lower_bound, upper_bound = _transform_bounds_to_canonical(dim, lower_bound, upper_bound)
 
@@ -38,7 +49,15 @@ def calculate_hill_climbing_features(f, dim, lower_bound, upper_bound, n_runs = 
             'hill_climbing.costs_runtime': timedelta(seconds=time.monotonic() - start_time).total_seconds()
       }
       
-def calculate_gradient_features(f, dim, lower_bound, upper_bound, step_size = None, budget_factor_per_dim = 100, seed = None):
+def calculate_gradient_features(
+      f: Callable[[List[float]], float], 
+      dim: int, 
+      lower_bound: Union[List[float], float], 
+      upper_bound: Union[List[float], float], 
+      step_size: float = None, 
+      budget_factor_per_dim: int = 100,
+      seed: Optional[int] = None) -> Dict[str, Union[int, float]]:
+
       start_time = time.monotonic()
       lower_bound, upper_bound = _transform_bounds_to_canonical(dim, lower_bound, upper_bound)
 
@@ -86,7 +105,14 @@ def calculate_gradient_features(f, dim, lower_bound, upper_bound, step_size = No
             'gradient.costs_runtime': timedelta(seconds=time.monotonic() - start_time).total_seconds()
       }
 
-def calculate_fitness_distance_correlation(X, y, f_opt = None, proportion_of_best = 1, minimize = True, minkowski_p = 2):
+def calculate_fitness_distance_correlation(
+      X: Union[pd.DataFrame, np.ndarray, List[List[float]]],
+      y: Union[pd.Series, np.ndarray, List[float]],
+      f_opt: Optional[float] = None,
+      proportion_of_best: float = 1.0,
+      minimize: bool = True,
+      minkowski_p: int = 2) -> Dict[str, Union[int, float]]:
+      
       start_time = time.monotonic()
       if proportion_of_best > 1 or proportion_of_best <= 0:
             raise Exception('Proportion of the best samples must be in the interval (0, 1]')
@@ -136,7 +162,16 @@ def calculate_fitness_distance_correlation(X, y, f_opt = None, proportion_of_bes
             'fitness_distance.costs_runtime': timedelta(seconds=time.monotonic() - start_time).total_seconds()
       }
          
-def calculate_length_scales_features(f, dim, lower_bound, upper_bound, budget_factor_per_dim = 100, seed = None, minimize = True, sample_size_from_kde = 500):
+def calculate_length_scales_features(
+      f: Callable[[List[float]], float], 
+      dim: int,
+      lower_bound: Union[List[float], float],
+      upper_bound: Union[List[float], float],
+      budget_factor_per_dim: int = 100, 
+      seed: Optional[int] = None,
+      minimize: bool = True,
+      sample_size_from_kde: int = 500) -> Dict[str, Union[int, float]]:
+
       start_time = time.monotonic()
       lower_bound, upper_bound = _transform_bounds_to_canonical(dim, lower_bound, upper_bound)
 
@@ -176,7 +211,16 @@ def calculate_length_scales_features(f, dim, lower_bound, upper_bound, budget_fa
             'length_scale.costs_runtime': timedelta(seconds=time.monotonic() - start_time).total_seconds()
       }
 
-def calculate_sobol_indices_features(f, dim, lower_bound, upper_bound, sampling_coefficient = 10000, n_bins = 20, min_obs_per_bin_factor = 1.5, seed = None):
+def calculate_sobol_indices_features(
+      f: Callable[[List[float]], float],
+      dim: int,
+      lower_bound: Union[List[float], float],
+      upper_bound: Union[List[float], float],
+      sampling_coefficient: int = 10000,
+      n_bins: int = 20,
+      min_obs_per_bin_factor: float = 1.5,
+      seed: Optional[int] = None) -> Dict[str, Union[int, float]]:
+
       start_time = time.monotonic()
       lower_bound, upper_bound = _transform_bounds_to_canonical(dim, lower_bound, upper_bound)
       if seed is not None:
