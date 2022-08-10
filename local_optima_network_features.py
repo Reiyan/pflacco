@@ -92,12 +92,50 @@ def compute_local_optima_network(
     lower_bound: Union[List[float], float],
     upper_bound: Union[List[float], float],
     seed: Optional[int] = None,
-    logs: bool = False,
     stepsize: int = 2,
     basin_hopping_iteration: int = 100,
     stopping_threshold: int = 1000,
     minimizer_kwargs: Optional[Dict[str, Any]] = None) -> Tuple[pd.DataFrame, pd.DataFrame]:
+    """Computation of a Local Optima Network in accordance to [1].
 
+    Parameters
+    ----------
+    f : Callable[[List[float]], float]
+        Objective function to be optimized.
+    dim : int
+        Dimensionality of the decision space.
+    lower_bound : Union[List[float], float]
+        Lower bound of variables of the decision space.
+    upper_bound : Union[List[float], float]
+        Upper bound of variables of the decision space.
+    seed : Optional[int], optional
+        Seed for reproducability, by default None.
+    stepsize : int, optional
+        Maximum step size for use in the random displacement, by default 2
+    basin_hopping_iteration : int, optional
+        Number of independet basin-hopping runs. Each basin-hopping run consists of
+        multiple iterations of a local search method, by default 100.
+    stopping_threshold : int, optional
+        Number of basin-hopping iterations. There will be a total of 
+        ``basin_hopping_iteration + 1`` runs of the local minimizer, by default 1000
+    minimizer_kwargs : Optional[Dict[str, Any]], optional
+        Extra keyword arguments to be passed to the local minimizer
+        ``scipy.optimize.minimize``, by default None.
+
+    Returns
+    -------
+    Tuple[pd.DataFrame, pd.DataFrame]
+        A tuple consisting of two Pandas dataframes. The first dataframe
+        contains information about the nodes, i.e., the local optima.
+        The second dataframe contains information about the edges.
+    
+    References
+    ----------
+    [1] Adair, J., Ochoa, G. and Malan, K.M., 2019, July.
+        Local optima networks for continuous fitness landscapes.
+        In Proceedings of the Genetic and Evolutionary Computation Conference Companion
+        (pp. 1407-1414).
+    """    
     global nodes, edges, last, restart
     restart = True
     nodes = []
@@ -135,6 +173,25 @@ def calculate_lon_features(
     nodes: pd.DataFrame,
     edges: pd.DataFrame,
     f_opt: float = None) -> Dict[str, Optional[Union[int, float]]]:
+    """Calculation of Local Optima Network (LON) features based on a LON.
+
+    Parameters
+    ----------
+    nodes : pd.DataFrame
+        A dataframe containing all nodes of the LON.
+        Can be created via the function ``compute_local_optima_network``.
+    edges : pd.DataFrame
+        A dataframe containg all edges of the LON.
+        Can be created via the function ``compute_local_optima_network``.
+    f_opt : float, optional
+        Objective value of the global optimum (if known) of the objective
+        function the LON was computed on, by default None.
+
+    Returns
+    -------
+    Dict[str, Optional[Union[int, float]]]
+        Dictionary consisting of the calculated features.
+    """
 
     n_optima = len(nodes)
     neutral = nodes.loc[nodes['neutrality'] > 1, 'neutrality'].sum()/nodes['neutrality'].sum()

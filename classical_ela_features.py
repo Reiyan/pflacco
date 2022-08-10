@@ -50,7 +50,21 @@ def _calculate_num_derivate(f, lower_bound, upper_bound, delta, eps, zero_tol, r
 def calculate_ela_meta(
       X: Union[pd.DataFrame, np.ndarray, List[List[float]]],
       y: Union[pd.Series, np.ndarray, List[float]]) -> Dict[str, Union[int, float]]:
+      """Calculation of ela_meta features, similar to the R-package `flacco`.
 
+      Parameters
+      ----------
+      X : Union[pd.DataFrame, np.ndarray, List[List[float]]]
+          A collection-like object which contains a sample of the decision space.
+          Can be created with `sampling.create_initial_sample`.
+      y : Union[pd.Series, np.ndarray, List[float]]
+          A list-like object which contains the respective objective values of `X`.
+
+      Returns
+      -------
+      Dict[str, Union[int, float]]
+          Dictionary consisting of the calculated features.
+      """      
       start_time = time.monotonic()
 
       X, y = _validate_variable_types(X, y)
@@ -125,7 +139,33 @@ def calculate_pca(
       prop_cor_x: float = 0.9,
       prop_cov_init: float = 0.9,
       prop_cor_init: float = 0.9) -> Dict[str, Union[int, float]]:
+      """Calculation of Principal Component features, similar to the R-package `flacco`.
 
+      Parameters
+      ----------
+      X : Union[pd.DataFrame, np.ndarray, List[List[float]]]
+          A collection-like object which contains a sample of the decision space.
+          Can be created with `sampling.create_initial_sample`.
+      y : Union[pd.Series, np.ndarray, List[float]]
+          A list-like object which contains the respective objective values of `X`.
+      prop_cov_x : float, optional
+          Proportion of the explained variance by the first
+          PC based on the covariance matrix, by default 0.9.
+      prop_cor_x : float, optional
+          Proportion of the explained variance by the first
+          PC based on the correlation matrix, by default 0.9.
+      prop_cov_init : float, optional
+          Proportion of the explained variance by the first
+          PC based on the covariance matrix, by default 0.9.
+      prop_cor_init : float, optional
+          Proportion of the explained variance by the first
+          PC based on the correlation matrix, by default 0.9.
+
+      Returns
+      -------
+      Dict[str, Union[int, float]]
+          Dictionary consisting of the calculated features.
+      """      
       start_time = time.monotonic()
       X, y = _validate_variable_types(X, y)
 
@@ -192,14 +232,36 @@ def calculate_nbc(
       fast_k: float = 0.05,
       dist_tie_breaker: str = 'sample',
       minimize: bool = True) -> Dict[str, Union[int, float]]:
+      """Calculation of Nearest Better Clustering features, similar to the R-package `flacco`.
 
+
+      Parameters
+      ----------
+      X : Union[pd.DataFrame, np.ndarray, List[List[float]]]
+          A collection-like object which contains a sample of the decision space.
+          Can be created with `sampling.create_initial_sample`.
+      y : Union[pd.Series, np.ndarray, List[float]]
+          A list-like object which contains the respective objective values of `X`.
+      fast_k : float, optional
+          Controls the percentage of observations that should be considered when looking
+          for the nearest better neighbour, by default 0.05.
+      dist_tie_breaker : str, optional
+          Strategy to break ties between observations. Currently allows `sample`, by default 'sample'.
+      minimize : bool, optional
+          Indicator whether the objective function should be minimized or maximized, by default True.
+
+      Returns
+      -------
+      Dict[str, Union[int, float]]
+          Dictionary consisting of the calculated features.
+      """      
       start_time = time.monotonic()
       X, y = _validate_variable_types(X, y)
 
       if fast_k < 1:
             fast_k = math.ceil(fast_k * X.shape[0])
       if fast_k < 0 or fast_k > X.shape[0]:
-            raise Exception(f'[{fast_k}] of "fast_k" does not lie in the interval [0,n] where n is the number of observations.')
+            raise ValueError(f'[{fast_k}] of "fast_k" does not lie in the interval [0,n] where n is the number of observations.')
       if minimize == False:
             y = y * -1
 
@@ -233,7 +295,7 @@ def calculate_nbc(
                               results.append([idx, ind_alt[j], d[j]])
                         else:
                               #TODO welche anderen Tiebreaker methoden gibt es? es gibt noch first und last
-                              raise Exception('Currently, the only available tie breaker method is "sample"')
+                              raise ValueError('Currently, the only available tie breaker method is "sample"')
 
       nb_stats = pd.DataFrame(results, columns = ['ownID', 'nbID', 'nbDist'])
       nb_stats['nearDist'] = [x[1] for x in distances]
@@ -270,7 +332,32 @@ def calculate_dispersion(
       dist_method: str = 'euclidean',
       dist_p: int = 2,
       minimize: bool = True) -> Dict[str, Union[int, float]]:
+      """Calculation of Dispersion features, similar to the R-package `flacco`.
 
+      Parameters
+      ----------
+      X : Union[pd.DataFrame, np.ndarray, List[List[float]]]
+          A collection-like object which contains a sample of the decision space.
+          Can be created with `sampling.create_initial_sample`.
+      y : Union[pd.Series, np.ndarray, List[float]]
+          A list-like object which contains the respective objective values of `X`.
+      disp_quantiles : List[float], optional
+          Quantiles which are used to determine the best elements of the entire sample,
+          by default [0.02, 0.05, 0.1, 0.25].
+      dist_method : str, optional
+          Determines which distance method is used. The given value is passed over to
+          `scipy.spatial.distance.pdist`, by default 'euclidean'.
+      dist_p : int, optional
+          The p-norm to apply for Minkowski. This is only considered when
+          `dist_method = 'minkowski'`, by default 2.
+      minimize : bool, optional
+          Indicator whether the objective function should be minimized or maximized, by default True.
+
+      Returns
+      -------
+      Dict[str, Union[int, float]]
+          Dictionary consisting of the calculated features.
+      """      
       start_time = time.monotonic()
       X, y = _validate_variable_types(X, y)
 
@@ -321,7 +408,45 @@ def calculate_information_content(
       ic_settling_sensitivity: float = 0.05,
       ic_info_sensitivity: float = 0.5,
       seed: Optional[int] = None) -> Dict[str, Union[int, float]]:
+      """Calculation of Information Content features, similar to the R-package `flacco`.
 
+      Parameters
+      ----------
+      X : Union[pd.DataFrame, np.ndarray, List[List[float]]]
+          A collection-like object which contains a sample of the decision space.
+          Can be created with `sampling.create_initial_sample`.
+      y : Union[pd.Series, np.ndarray, List[float]]
+          A list-like object which contains the respective objective values of `X`.
+      ic_sorting : str, optional
+          Sorting strategy, which is used to define the tour through the landscape.
+          Possible values are 'nn' and 'random, by default 'nn'.
+      ic_nn_neighborhood : int, optional
+          Number of neighbours to be considered in the computation, by default 20.
+      ic_nn_start : Optional[int], optional
+          Indices of the observation which should be used as starting points.
+          When none are supplied, these are chosen randomly, by default None.
+      ic_epsilon : List[float], optional
+          Epsilon values as described in section V.A of [1],
+          by default `np.insert(10 ** np.linspace(start = -5, stop = 15, num = 1000), 0, 0)`.
+      ic_settling_sensitivity : float, optional
+          Threshold, which should be used for computing the settling sensitivity of [1], by default 0.05.
+      ic_info_sensitivity : float, optional
+          Portion of partial information sensitivity of [1], by default 0.5
+      seed : Optional[int], optional
+          Seed for reproducability, by default None
+
+      Returns
+      -------
+      Dict[str, Union[int, float]]
+          Dictionary consisting of the calculated features.
+
+      References
+      ----------
+      [1] Muñoz, M.A., Kirley, M. and Halgamuge, S.K., 2014.
+          Exploratory landscape analysis of continuous space optimization problems using information content.
+          IEEE transactions on evolutionary computation, 19(1), pp.74-87.
+
+      """      
       start_time = time.monotonic()
       X, y = _validate_variable_types(X, y)
 
@@ -460,10 +585,30 @@ def calculate_information_content(
 def calculate_ela_distribution(
       X: Union[pd.DataFrame, np.ndarray, List[List[float]]],
       y: Union[pd.Series, np.ndarray, List[float]],
-      ela_distr_smoothing_bandwith: str = 'SJ',
-      ela_distr_modemass_threshold: float = 0.01,
+      #ela_distr_smoothing_bandwith: str = 'SJ',
+      #ela_distr_modemass_threshold: float = 0.01,
       ela_distr_skewness_type: int = 3,
       ela_distr_kurtosis_type: int = 3) -> Dict[str, Union[int, float]]:
+      """Calculation of ELA Distribution features, similar to the R-package `flacco`.
+
+      Parameters
+      ----------
+      X : Union[pd.DataFrame, np.ndarray, List[List[float]]]
+          A collection-like object which contains a sample of the decision space.
+          Can be created with `sampling.create_initial_sample`.
+      y : Union[pd.Series, np.ndarray, List[float]]
+          A list-like object which contains the respective objective values of `X`.
+      ela_distr_skewness_type : int, optional
+          Integer indicating which algorithm to use, by default 3.
+      ela_distr_kurtosis_type : int, optional
+          Integer indicating which algorithm to use, by default 3.
+
+      Returns
+      -------
+      Dict[str, Union[int, float]]
+          Dictionary consisting of the calculated features.
+
+      """      
 
       start_time = time.monotonic()
       if ela_distr_skewness_type not in range(1,4):
@@ -531,7 +676,27 @@ def calculate_limo(
       lower_bound: Union[List[float], float],
       upper_bound: Union[List[float], float],
       blocks: Optional[Union[List[int], np.ndarray, int]] = None) -> Dict[str, Optional[Union[int, float]]]:
+      """Calculation of Linear Model features, similar to the R-package `flacco`.
 
+      Parameters
+      ----------
+      X : Union[pd.DataFrame, np.ndarray, List[List[float]]]
+          A collection-like object which contains a sample of the decision space.
+          Can be created with `sampling.create_initial_sample`.
+      y : Union[pd.Series, np.ndarray, List[float]]
+          A list-like object which contains the respective objective values of `X`.
+      lower_bound : Union[List[float], float]
+          Lower bound of variables of the decision space.
+      upper_bound : Union[List[float], float]
+          Upper bound of variables of the decision space.
+      blocks : Optional[Union[List[int], np.ndarray, int]], optional
+          Number of blocks per dimension, by default None.
+
+      Returns
+      -------
+      Dict[str, Optional[Union[int, float]]]
+          Dictionary consisting of the calculated features.
+      """      
       start_time = time.monotonic()
       X, y = _validate_variable_types(X, y)
       dims = X.shape[1]
@@ -606,7 +771,30 @@ def calculate_cm_angle(
       upper_bound: Union[List[float], float],
       blocks: Optional[Union[List[int], np.ndarray, int]] = None,
       minimize: bool = True) -> Dict[str, Union[int, float]]:
+      """Calculation of Cell Mapping Angle features, similar to the R-package `flacco`.
 
+      Parameters
+      ----------
+      X : Union[pd.DataFrame, np.ndarray, List[List[float]]]
+          A collection-like object which contains a sample of the decision space.
+          Can be created with `sampling.create_initial_sample`.
+      y : Union[pd.Series, np.ndarray, List[float]]
+          A list-like object which contains the respective objective values of `X`.
+      lower_bound : Union[List[float], float]
+          Lower bound of variables of the decision space.
+      upper_bound : Union[List[float], float]
+          Upper bound of variables of the decision space.
+      blocks : Optional[Union[List[int], np.ndarray, int]], optional
+          Number of blocks per dimension, by default None.
+      minimize : bool, optional
+          Indicator whether the objective function should be minimized or maximized, by default True.
+
+      Returns
+      -------
+      Dict[str, Union[int, float]]
+          Dictionary consisting of the calculated features.
+
+      """      
       start_time = time.monotonic()
       X, y = _validate_variable_types(X, y)
       dim = X.shape[1]
@@ -617,7 +805,7 @@ def calculate_cm_angle(
       elif isinstance(blocks, list):
             blocks = np.array(blocks)
       if len(blocks) != dim:
-            raise Exception('The provided value for "block" does not have the same length as the dimensionality of X.')
+            raise ValueError('The provided value for "block" does not have the same length as the dimensionality of X.')
 
       init = X.copy()
       init['y'] = y if minimize == True else -1 * y
@@ -678,15 +866,42 @@ def calculate_cm_conv(
       minimize: bool = True,
       cm_conv_diag: bool = False,
       cm_conv_fast_k: float = 0.05) -> Dict[str, Union[int, float]]:
+      """Calculation of Cell Mapping Convexity features, similar to the R-package `flacco`.
 
+      Parameters
+      ----------
+      X : Union[pd.DataFrame, np.ndarray, List[List[float]]]
+          A collection-like object which contains a sample of the decision space.
+          Can be created with `sampling.create_initial_sample`.
+      y : Union[pd.Series, np.ndarray, List[float]]
+          A list-like object which contains the respective objective values of `X`.
+      lower_bound : Union[List[float], float]
+          Lower bound of variables of the decision space.
+      upper_bound : Union[List[float], float]
+          Upper bound of variables of the decision space.
+      blocks : Optional[Union[List[int], np.ndarray, int]], optional
+          Number of blocks per dimension, by default None.
+      minimize : bool, optional
+          Indicator whether the objective function should be minimized or maximized, by default True.
+      cm_conv_diag : bool, optional
+          Indicator which, when true, consideres cells on the diagonal also as neighbours, by default False.
+      cm_conv_fast_k : float, optional
+          Percentage of elements that should be considered within the nearest neighbour computation, by default 0.05.
+
+      Returns
+      -------
+      Dict[str, Union[int, float]]
+          Dictionary consisting of the calculated features.
+
+      """      
       start_time = time.monotonic()
       X, y = _validate_variable_types(X, y)
       dim = X.shape[1]
       blocks = _check_blocks_variable(X, dim, blocks)
       if blocks.min() <= 2:
-            raise Exception('The cell convexity features can only be computed when all dimensions have more than 2 cells.')
+            raise ValueError('The cell convexity features can only be computed when all dimensions have more than 2 cells.')
       if cm_conv_fast_k < 0 or cm_conv_fast_k > X.shape[0]:
-            raise Exception('cm_conv_fast_k must be in the interval [0, n] where n is the number of observations in X.')
+            raise ValueError('cm_conv_fast_k must be in the interval [0, n] where n is the number of observations in X.')
 
       init = X.copy()
       init['y'] = y if minimize == True else -1 * y
@@ -815,26 +1030,45 @@ def calculate_cm_grad(
       lower_bound: Union[List[float], float],
       upper_bound: Union[List[float], float],
       blocks: Optional[Union[List[int], np.ndarray, int]] = None,
-      minimize: bool = True,
-      cm_conv_diag: bool = False,
-      cm_conv_fast_k: float = 0.05) -> Dict[str, Union[int, float]]:
+      minimize: bool = True) -> Dict[str, Union[int, float]]:
+      """Calculation of Cell Mapping Gradient Homogeneity features, similar to the R-package `flacco`.
 
+      Parameters
+      ----------
+      X : Union[pd.DataFrame, np.ndarray, List[List[float]]]
+          A collection-like object which contains a sample of the decision space.
+          Can be created with `sampling.create_initial_sample`.
+      y : Union[pd.Series, np.ndarray, List[float]]
+          A list-like object which contains the respective objective values of `X`.
+      lower_bound : Union[List[float], float]
+          Lower bound of variables of the decision space.
+      upper_bound : Union[List[float], float]
+          Upper bound of variables of the decision space.
+      blocks : Optional[Union[List[int], np.ndarray, int]], optional
+          Number of blocks per dimension, by default None.
+      minimize : bool, optional
+          Indicator whether the objective function should be minimized or maximized, by default True.
+
+      Returns
+      -------
+      Dict[str, Union[int, float]]
+          Dictionary consisting of the calculated features.
+
+      """      
       start_time = time.monotonic()
       X, y = _validate_variable_types(X, y)
       dim = X.shape[1]
       blocks = _check_blocks_variable(X, dim, blocks)
 
       if blocks.min() <= 2:
-            raise Exception('The cell grad features can only be computed when all dimensions have more than 2 cells.')
-      if cm_conv_fast_k < 0 or cm_conv_fast_k > X.shape[0]:
-            raise Exception('cm_conv_fast_k must be in the interval [0, n] where n is the number of observations in X.')
+            raise ValueError('The cell grad features can only be computed when all dimensions have more than 2 cells.')
 
       init = X.copy()
       init['y'] = y if minimize == True else -1 * y
-      init['cell'], cell_centers = _create_blocks(X, y, lower_bound, upper_bound, blocks)
+      init['cell'], _ = _create_blocks(X, y, lower_bound, upper_bound, blocks)
 
       grad_homo = []
-      for cname, cell in init.groupby(['cell']):
+      for _, cell in init.groupby(['cell']):
             n_obs = cell.shape[0]
             funvals = cell['y'].values
             cell = cell.to_numpy()
@@ -867,7 +1101,28 @@ def calculate_ela_conv(
       f: Callable[[List[float]], float],
       ela_conv_nsample: int = 1000,
       ela_conv_threshold: float = 1e-10) -> Dict[str, Union[int, float]]:
+      """Calculation of ELA Convexity features, similar to the R-package `flacco`.
 
+      Parameters
+      ----------
+      X : Union[pd.DataFrame, np.ndarray, List[List[float]]]
+          A collection-like object which contains a sample of the decision space.
+          Can be created with `sampling.create_initial_sample`.
+      y : Union[pd.Series, np.ndarray, List[float]]
+          A list-like object which contains the respective objective values of `X`.
+      f : Callable[[List[float]], float]
+          Objective function to be optimized.
+      ela_conv_nsample : int, optional
+          Number of samples that are drawn for calculating the convexity features, by default 1000.
+      ela_conv_threshold : float, optional
+          Threshold of the linearity, i.e., the tolerance to/deviation from perfect linearity,
+          in order to still be considered linear, by default 1e-10.
+
+      Returns
+      -------
+      Dict[str, Union[int, float]]
+          Dictionary consisting of the calculated features.
+      """      
       start_time = time.monotonic()
       X, y = _validate_variable_types(X, y)
       delta = []
@@ -898,7 +1153,28 @@ def calculate_ela_level(
       ela_level_quantiles: List[float] = [0.1, 0.25, 0.5],
       interface_mda_from_R: bool = False,
       ela_level_resample_iterations: int = 10) -> Dict[str, Union[int, float]]:
+      """Calculation of ELA Levelset features, similar to the R-package `flacco`.
 
+      Parameters
+      ----------
+      X : Union[pd.DataFrame, np.ndarray, List[List[float]]]
+          A collection-like object which contains a sample of the decision space.
+          Can be created with `sampling.create_initial_sample`.
+      y : Union[pd.Series, np.ndarray, List[float]]
+          A list-like object which contains the respective objective values of `X`.
+      ela_level_quantiles : List[float], optional
+          Cutpoints (quantiles of the objective values) for splitting the objective space, by default [0.1, 0.25, 0.5].
+      interface_mda_from_R : bool, optional
+          Indicator whether to interface missing functionality from R, by default False.
+      ela_level_resample_iterations : int, optional
+          Number of iterations of the resampling method, by default 10.
+
+      Returns
+      -------
+      Dict[str, Union[int, float]]
+          Dictionary consisting of the calculated features.
+
+      """      
       start_time = time.monotonic()
       X, y = _validate_variable_types(X, y)
       mda_mmce = []
@@ -906,7 +1182,7 @@ def calculate_ela_level(
       if interface_mda_from_R:
             #mda = _interface_mda()
             
-            raise Exception('MDA is not implemented yet.')
+            raise NotImplementedError('MDA is not implemented yet.')
             
 
       lda_mmce = []
@@ -986,7 +1262,49 @@ def calculate_ela_curvate(
       r: int = 4,
       v: int = 2,
       seed: Optional[int] = None) -> Dict[str, Union[int, float]]:
+      """Calculation of ELA Curvature features, similar to the R-package `flacco`.
 
+      Parameters
+      ----------
+      X : Union[pd.DataFrame, np.ndarray, List[List[float]]]
+          A collection-like object which contains a sample of the decision space.
+          Can be created with `sampling.create_initial_sample`.
+      y : Union[pd.Series, np.ndarray, List[float]]
+          A list-like object which contains the respective objective values of `X`.
+      f : Callable[[List[float]], float]
+          Objective function to be optimized.
+      dim : int
+          Dimensionality of the decision space.
+      lower_bound : Union[List[float], float]
+          Lower bound of variables of the decision space.
+      upper_bound : Union[List[float], float]
+          Upper bound of variables of the decision space.
+      sample_size_factor : int, optional
+          Factor which determines the sample size by `sample_size_factor * dim`, by default 100.
+      delta : float, optional
+          Parameter used to approximate the gradient and hessian.
+          See `grad` and `hessian` of the R-package numDeriv for more details, by default 10**-4.
+      eps : float, optional
+          Parameter used to approximate the gradient and hessian.
+          See `grad` and `hessian` of the R-package numDeriv for more details, by default 10**-4.
+      zero_tol : float, optional
+          Parameter used to approximate the gradient and hessian.
+          See `grad` and `hessian` of the R-package numDeriv for more details, by default np.sqrt(np.nextafter(0, 1)/70**-7).
+      r : int, optional
+          Parameter used to approximate the gradient and hessian.
+          See `grad` and `hessian` of the R-package numDeriv for more details, by default 4.
+      v : int, optional
+          Parameter used to approximate the gradient and hessian.
+          See `grad` and `hessian` of the R-package numDeriv for more details, by default 2.
+      seed : Optional[int], optional
+          Seed for reproducability, by default None.
+
+      Returns
+      -------
+      Dict[str, Union[int, float]]
+          Dictionary consisting of the calculated features.
+
+      """      
       start_time = time.monotonic()
 
       X, y = _validate_variable_types(X, y)
@@ -1052,7 +1370,41 @@ def calculate_ela_local(
       ela_local_clust_method: str = 'single',
       seed: Optional[int] = None,
       **minimizer_kwargs) -> Dict[str, Union[int, float]]:
+      """Calculation of ELA Local Search features, similar to the R-package `flacco`.
 
+      Parameters
+      ----------
+      X : Union[pd.DataFrame, np.ndarray, List[List[float]]]
+          A collection-like object which contains a sample of the decision space.
+          Can be created with `sampling.create_initial_sample`.
+      y : Union[pd.Series, np.ndarray, List[float]]
+          A list-like object which contains the respective objective values of `X`.
+      f : Callable[[List[float]], float]
+          Objective function to be optimized.
+      dim : int
+          Dimensionality of the decision space.
+      lower_bound : Union[List[float], float]
+          Lower bound of variables of the decision space.
+      upper_bound : Union[List[float], float]
+          Upper bound of variables of the decision space.
+      minimize : bool, optional
+          Indicator whether the objective function should be minimized or maximized, by default True.
+      ela_local_local_searches_factor : int, optional
+          Factor which determines the number of local searches by
+          `ela_local_local_searches_factor * dim`, by default 50.
+      ela_local_optim_method : str, optional
+          Type of solver. Any of `scipy.optimize.minimize` can be used, by default 'L-BFGS-B'.
+      ela_local_clust_method : str, optional
+          Hierarchical clustering method to use, by default 'single'.
+      seed : Optional[int], optional
+          Seed for reproducability, by default None.
+
+      Returns
+      -------
+      Dict[str, Union[int, float]]
+          Dictionary consisting of the calculated features.
+
+      """      
       start_time = time.monotonic()
       X, y = _validate_variable_types(X, y)
       lower_bound, upper_bound = _transform_bounds_to_canonical(dim, lower_bound, upper_bound)
@@ -1063,7 +1415,7 @@ def calculate_ela_local(
             f = lambda x: -1 * original_f(x)
 
       if X.shape[0] < N:
-            raise Exception(f'X contains less then the required {N} (= dim * ela_local_local_searches_factor) starting points')
+            raise ValueError(f'X contains less then the required {N} (= dim * ela_local_local_searches_factor) starting points')
       if seed is not None:
             np.random.seed(seed)
       

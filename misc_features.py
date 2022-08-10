@@ -22,7 +22,43 @@ def calculate_hill_climbing_features(
       minimize: bool = True,
       seed: Optional[int] = None,
       minkowski_p: int = 2) -> Dict[str, Union[int, float]]:
+      """Calculation of a Hill Climbing features in accordance to [1].
 
+      Parameters
+      ----------
+      f : Callable[[List[float]], float]
+          Objective function to be optimized.
+      dim : int
+          Dimensionality of the decision space.
+      lower_bound : Union[List[float], float]
+          Lower bound of variables of the decision space.
+      upper_bound : Union[List[float], float]
+          Upper bound of variables of the decision space.
+      n_runs : int, optional
+          Number of independent solver runs to create the sample, by default 100.
+      budget_factor_per_run : int, optional
+          Budget factor for each individual solver run. The realized budget
+          is calculated with ``budget_factor_per_run * dim``, by default 1000.
+      method : str, optional
+          Type of solver. Any of `scipy.optimize.minimize` can be used, by default 'L-BFGS-B'.
+      minimize : bool, optional
+          Indicator whether the objective function should be minimized or maximized, by default True.
+      seed : Optional[int], optional
+          Seed for reproducability, by default None.
+      minkowski_p : int, optional
+          The p-norm to apply for Minkowski, by default 2.
+
+      Returns
+      -------
+      Dict[str, Union[int, float]]
+          Dictionary consisting of the calculated features.
+
+      References
+      ----------
+      [1] Abell, T., Malitsky, Y. and Tierney, K., 2013, January.
+          Features for exploiting black-box optimization problem structure.
+          In International Conference on Learning and Intelligent Optimization (pp. 30-36). 
+      """      
       start_time = time.monotonic()
       lower_bound, upper_bound = _transform_bounds_to_canonical(dim, lower_bound, upper_bound)
 
@@ -57,6 +93,37 @@ def calculate_gradient_features(
       step_size: float = None, 
       budget_factor_per_dim: int = 100,
       seed: Optional[int] = None) -> Dict[str, Union[int, float]]:
+      """Calculation of a Gradient features in accordance to [1].
+
+      Parameters
+      ----------
+      f : Callable[[List[float]], float]
+          Objective function to be optimized.
+      dim : int
+          Dimensionality of the decision space.
+      lower_bound : Union[List[float], float]
+          Lower bound of variables of the decision space.
+      upper_bound : Union[List[float], float]
+          Upper bound of variables of the decision space.
+      step_size : float, optional
+          _description_, by default None
+      budget_factor_per_dim : int, optional
+          The realized budget is calculated with 
+          ``budget_factor_per_dim * dim``, by default 100.
+      seed : Optional[int], optional
+          Seed for reproducability, by default None.
+
+      Returns
+      -------
+      Dict[str, Union[int, float]]
+          Dictionary consisting of the calculated features.
+      
+      References
+      ----------
+      [1] Malan, K.M. and Engelbrecht, A.P., 2013, June.
+          Ruggedness, funnels and gradients in fitness landscapes and the effect on PSO performance.
+          In 2013 IEEE Congress on Evolutionary Computation (pp. 963-970). IEEE.
+      """
 
       start_time = time.monotonic()
       lower_bound, upper_bound = _transform_bounds_to_canonical(dim, lower_bound, upper_bound)
@@ -109,13 +176,47 @@ def calculate_fitness_distance_correlation(
       X: Union[pd.DataFrame, np.ndarray, List[List[float]]],
       y: Union[pd.Series, np.ndarray, List[float]],
       f_opt: Optional[float] = None,
-      proportion_of_best: float = 1.0,
+      proportion_of_best: float = 0.1,
       minimize: bool = True,
       minkowski_p: int = 2) -> Dict[str, Union[int, float]]:
-      
+      """Calculation of Fitness Distance Correlation features in accordance to [1] and [2].
+
+      Parameters
+      ----------
+      X : Union[pd.DataFrame, np.ndarray, List[List[float]]]
+          A collection-like object which contains a sample of the decision space.
+          Can be created with `sampling.create_initial_sample`.
+      y : Union[pd.Series, np.ndarray, List[float]]
+          A list-like object which contains the respective objective values of `X`.
+      f_opt : Optional[float], optional
+          Objective value of the global optimum (if known), by default None.
+      proportion_of_best : float, optional
+          Value which is used to split the provided observations `X` and `y` into
+          the top `proportion_of_best * 100`% individuals and the remaining.
+          Must be within the interval (0, 1], by default 0.1.
+      minimize : bool, optional
+          Indicator whether the objective function should be minimized or maximized, by default True.
+      minkowski_p : int, optional
+          The p-norm to apply for Minkowski, by default 2.
+
+      Returns
+      -------
+      Dict[str, Union[int, float]]
+          Dictionary consisting of the calculated features.
+
+      References
+      ----------
+      [1] Jones, T. and Forrest, S., 1995, July.
+          Fitness distance correlation as a measure of problem difficulty for genetic algorithms.
+          In ICGA (Vol. 95, pp. 184-192).
+      [2] Müller, C.L. and Sbalzarini, I.F., 2011, April.
+          Global characterization of the CEC 2005 fitness landscapes using fitness-distance analysis.
+          In European conference on the applications of evolutionary computation (pp. 294-303).
+
+      """      
       start_time = time.monotonic()
       if proportion_of_best > 1 or proportion_of_best <= 0:
-            raise Exception('Proportion of the best samples must be in the interval (0, 1]')
+            raise ValueError('Proportion of the best samples must be in the interval (0, 1]')
       '''
       if not type(y) is not pd.Series:
             y = pd.Series(y)
@@ -171,7 +272,39 @@ def calculate_length_scales_features(
       seed: Optional[int] = None,
       minimize: bool = True,
       sample_size_from_kde: int = 500) -> Dict[str, Union[int, float]]:
+      """Calculation of Length-Scale features in accordance to [1].
 
+      Parameters
+      ----------
+      f : Callable[[List[float]], float]
+          Objective function to be optimized.
+      dim : int
+          Dimensionality of the decision space.
+      lower_bound : Union[List[float], float]
+          Lower bound of variables of the decision space.
+      upper_bound : Union[List[float], float]
+          Upper bound of variables of the decision space.
+      budget_factor_per_dim : int, optional
+          The realized budget is calculated with 
+          ``budget_factor_per_dim * (dim ** 2)``, by default 100
+      seed : Optional[int], optional
+          Seed for reproducability, by default None
+      minimize : bool, optional
+          Indicator whether the objective function should be minimized or maximized, by default True
+      sample_size_from_kde : int, optional
+          Sample size which is sampled from the fitted kde distribution, by default 500.
+
+      Returns
+      -------
+      Dict[str, Union[int, float]]
+          Dictionary consisting of the calculated features.
+
+      References
+      ----------
+      [1] Morgan, R. and Gallagher, M., 2017.
+          Analysing and characterising optimization problems using length scale.
+          Soft Computing, 21(7), pp.1735-1752.
+      """      
       start_time = time.monotonic()
       lower_bound, upper_bound = _transform_bounds_to_canonical(dim, lower_bound, upper_bound)
 
@@ -220,7 +353,40 @@ def calculate_sobol_indices_features(
       n_bins: int = 20,
       min_obs_per_bin_factor: float = 1.5,
       seed: Optional[int] = None) -> Dict[str, Union[int, float]]:
+      """Calculation of Sobol Indices, Fitness- and State-Distribution features.
 
+      Parameters
+      ----------
+      f : Callable[[List[float]], float]
+          Objective function to be optimized.
+      dim : int
+          Dimensionality of the decision space.
+      lower_bound : Union[List[float], float]
+          Lower bound of variables of the decision space.
+      upper_bound : Union[List[float], float]
+          Upper bound of variables of the decision space.
+      sampling_coefficient : int, optional
+          Factor which determines the sample size. The actual sample size
+          used in the paper is ``sampling_coffient * (dim + 2)``, by default 10000.
+      n_bins : int, optional
+          Number of bins used in the construction of the histogram, by default 20.
+      min_obs_per_bin_factor : float, optional
+          Bins with less than ``min_obs_per_bin_factoro * dim``
+          are ignored in the computation (see Equation 5 of [1]), by default 1.5.
+      seed : Optional[int], optional
+          Seed for reproducability, by default None.
+
+      Returns
+      -------
+      Dict[str, Union[int, float]]
+          Dictionary consisting of the calculated features.
+
+      References
+      ----------
+      [1] Waibel, C., Mavromatidis, G. and Zhang, Y.W., 2020, July.
+          Fitness Landscape Analysis Metrics based on Sobol Indices and Fitness-and State-Distributions.
+          In 2020 IEEE Congress on Evolutionary Computation (CEC) (pp. 1-8).
+      """      
       start_time = time.monotonic()
       lower_bound, upper_bound = _transform_bounds_to_canonical(dim, lower_bound, upper_bound)
       if seed is not None:
