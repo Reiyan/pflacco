@@ -1,13 +1,20 @@
-# pflacco: A Python Interface of the R Package flacco
+# pflacco: The R-package flacco in native Python code
 For people who are not comfortable with R.
 
 ## Summary
 Feature-based landscape analysis of continuous and constrained optimization problems is now available in Python as well.
-This package provides a python interface to the R package [flacco](https://github.com/kerschke/flacco) by Pascal Kerschke.
+This package provides a python interface to the R package [flacco](https://github.com/kerschke/flacco) by Pascal Kerschke in version v0.4.0.
+And know also a native Python implementation with additional features such as:
+- [Features for exploiting black-box optimization problem structure](https://pure.itu.dk/ws/files/76529050/bbo_lion7.pdf).
+- [Ruggedness, funnels and gradients in fitness landscapes and the effect on PSO performance](https://ieeexplore.ieee.org/abstract/document/6557671).
+- [Global characterization of the CEC 2005 fitness landscapes using fitness-distance analysis](https://publications.mpi-cbg.de/Müller_2011_5158.pdf).
+- [Analysing and characterising optimization problems using length scale](https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.709.9948&rep=rep1&type=pdf).
+- [Fitness Landscape Analysis Metrics based on Sobol Indices and Fitness-and State-Distributions.](https://d1wqtxts1xzle7.cloudfront.net/64119519/E-24133-with-cover-page-v2.pdf?Expires=1660259914&Signature=AFRODPsFafOvNWjio-CKpkqcUWISBObg5h8vKbTlYpZ1PG2fCtXmTZQnegNxyv8E-PS1AA-TbPau3EkA2oByRsajdtvFN3eVQJ7JeenQp0DPOMdCmTM8hWeP8kwvFZ7yug9DRv86aYbjxyiugaUNKF7cUDkt6grv329NVwtYN-OvoCLz-NIfoNTk41rUG~csRcXgBI~6AW1E1mjUAm1KGtNYXy3n3LPfTLeuQtHN2qFZAFPn4Yx1F~a68vVDfQ7UHBIOM5dFkJoETz7pq5ZdjzWp8rIBlgmdUtptgGIhws8m03nzDKS-OnjuKudNtnbwCdlSXjt-I59RRWp-FQynGQ__&Key-Pair-Id=APKAJLOHF5GGSLRBV4ZA).
+
 The following is the description of the original flacco package:
 > flacco is a collection of features for Explorative Landscape Analysis (ELA) of single-objective, continuous (Black-Box-)Optimization Problems. It allows the user to quantify characteristics of an (unknown) optimization problem's landscape.
 >
-> Features, which used to be spread over different packages and platforms (R, Matlab, python, etc.), are now combined within this single package. Amongst others, this package contains feature sets, such as ELA, Information Content, Dispersion, (General) Cell Mapping or Barrier Trees.
+> Features, which used to be spread over different packages and platforms (R, Matlab, Python, etc.), are now combined within this single package. Amongst others, this package contains feature sets, such as ELA, Information Content, Dispersion, (General) Cell Mapping or Barrier Trees.
 >
 > Furthermore, the package provides a unified interface for all features -- using a so-called feature object and (if required) control arguments. In total, the current release (1.7) consists of 17 different feature sets, which sum up to approximately 300 features.
 >
@@ -15,37 +22,45 @@ The following is the description of the original flacco package:
 
 The calculation procedure and further background information of ELA features is given in [Comprehensive Feature-Based Landscape Analysis of Continuous and Constrained Optimization Problems Using the R-Package flacco](https://arxiv.org/abs/1708.05258).
 ## Prerequisites
-For a stable (and tested) outcome, pflacco requires at least [Python>=3.6.4](https://www.python.org/downloads/release/python-364/) and [R>=3.6.1](https://cran.uni-muenster.de)
+For a stable (and tested) outcome, pflacco requires at least [Python>=3.6.4](https://www.python.org/downloads/release/python-364/)
 
 ## Setup
 Easy as it usually is in Python:
 ```bash
-python -m pip install flacco
+python -m pip install pflacco
 ```
 
 ## Quickstart
 ```python
-from pflacco.pflacco import create_initial_sample, create_feature_object, calculate_feature_set, calculate_features
+from pflacco.sampling import create_initial_sample
+
+from pflacco.classical_ela_features import calculate_ela_distribution
+from pflacco.misc_features import calculate_fitness_distance_correlation
+from pflacco.local_optima_network_features import compute_local_optima_network, calculate_lon_features
 
 # Arbitrary objective function
-def objective_function(x, dim):
-    return [entry[0]**2 - entry[1]**2 for entry in x]
+def objective_function(x):
+    return x[0]**2 - x[1]**2
 
-
+dim = 2
 # Create inital sample using latin hyper cube sampling
-sample = create_initial_sample(100, 2, type = 'lhs')
+X = create_initial_sample(dim, sample_type = 'lhs')
 # Calculate the objective values of the initial sample using an arbitrary objective function (here y = x1^2 - x2^2)
-obj_values = objective_function(sample, 2)
-# Create feature object
-feat_object = create_feature_object(sample, obj_values, blocks=3)
+y = X.apply(lambda x: objective_function(x), axis = 1)
 
-# Calculate a single feature set
-cm_angle_features = calculate_feature_set(feat_object, 'cm_angle')
-print(cm_angle_features)
+# Compute an exemplary feature set from the convential ELA features of the R-package flacco
+ela_distr = calculate_ela_distribution(X, y)
+print(ela_distr)
 
-# Calculate all features
-ela_features = calculate_features(feat_object)
-print(ela_features)
+# Compute an exemplary feature set from the novel features which are not part of the R-package flacco yet.
+fdc = calculate_fitness_distance_correlation(X, y)
+print(fdc)
+
+# Compute a Local Optima Network (LON). From this network, LON features can be calculated.
+nodes, edges = compute_local_optima_network(f=objective_function, dim=dim, lower_bound=0, upper_bound=1)
+lon = calculate_lon_features(nodes, edges)
+print(lon)
+
 ```
 
 ## Contact
