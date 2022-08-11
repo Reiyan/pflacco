@@ -15,7 +15,7 @@ setuptools.setup(
      long_description_content_type="text/markdown",
      license='MIT',
      install_requires=required,
-     url="https://github.com/javatechy/dokr",
+     url="https://pypi.org/project/pflacco/",
      packages=setuptools.find_packages(),
      classifiers=[
          "Programming Language :: Python :: 3",
