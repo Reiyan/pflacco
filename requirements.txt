@@ -1,5 +1,6 @@
-numpy>=1.20.0
-sklearn>=0.24.1
+numpy~=1.20.0
+scikit-learn~=1.1.2
 pyDOE>=0.3.8
-scipy
-SALib
+scipy~=1.9.0
+SALib~=1.4.5
+numdifftools~=0.9.40
