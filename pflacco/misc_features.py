@@ -8,7 +8,7 @@ from scipy.spatial.distance import pdist, squareform
 from scipy.stats import entropy, gaussian_kde, moment
 from typing import Callable, Dict, List, Optional, Union
 
-from pflacco_utils import _transform_bounds_to_canonical, _validate_variable_types, _determine_max_n_blocks, _check_blocks_variable, _create_blocks
+from .utils import _transform_bounds_to_canonical, _validate_variable_types, _determine_max_n_blocks, _check_blocks_variable, _create_blocks
 from sampling import _create_local_search_sample, create_initial_sample, _levy_random_walk
 
 def calculate_hill_climbing_features(

@@ -4,7 +4,7 @@ import random
 import scipy.optimize as opt
 
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
-from pflacco_utils import _transform_bounds_to_canonical
+from .utils import _transform_bounds_to_canonical
 
 def _consolidate_edges(edges):
     edges = edges.groupby(['source', 'target']).size().reset_index(name='weight')

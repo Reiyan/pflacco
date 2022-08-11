@@ -7,7 +7,7 @@ from scipy.stats import levy
 from scipy.optimize import minimize as scipy_minimize
 from typing import List, Optional, Union
 
-from pflacco_utils import _transform_bounds_to_canonical
+from .utils import _transform_bounds_to_canonical
 
 def create_initial_sample(
       dim: int,

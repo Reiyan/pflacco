@@ -20,7 +20,7 @@ from scipy.cluster.hierarchy import linkage, cut_tree, _order_cluster_tree
 
 from typing import Callable, Dict, List, Optional, Union
 
-from pflacco_utils import _determine_max_n_blocks, _create_blocks, _validate_variable_types, _transform_bounds_to_canonical, _check_blocks_variable, _cartesian_product_efficient
+from .utils import _determine_max_n_blocks, _create_blocks, _validate_variable_types, _transform_bounds_to_canonical, _check_blocks_variable, _cartesian_product_efficient
 
 
 def _calculate_num_derivate(f, lower_bound, upper_bound, delta, eps, zero_tol, r, v, x):
