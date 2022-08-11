@@ -371,10 +371,12 @@ def calculate_dispersion(
             idx_in_quantiles[str(disp_quantiles[idx])] = [x for x in y[y < quantile].index]
 
       dists = {}
-      # Parameter p only will apply if method is 'minkowski'. Otherwise it will be ignored by scipy
       for quantile in idx_in_quantiles:
             idx_in_quantiles[quantile]
-            dists[quantile] = squareform(pdist(X.iloc[idx_in_quantiles[quantile]], metric = dist_method, p = dist_p))
+            if dist_method == 'minkowski':
+                  dists[quantile] = squareform(pdist(X.iloc[idx_in_quantiles[quantile]], metric = dist_method, p = dist_p))
+            else:
+                  dists[quantile] = squareform(pdist(X.iloc[idx_in_quantiles[quantile]], metric = dist_method))
 
       dist_full_sample = squareform(pdist(X, metric = dist_method))
 

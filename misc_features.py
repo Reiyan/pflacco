@@ -229,12 +229,6 @@ def calculate_fitness_distance_correlation(
             y = y * -1
       if f_opt is not None and not minimize:
             f_opt = -f_opt
-      if f_opt is None:
-            fopt_idx = y.idxmin()
-      elif len(y[y == f_opt]) > 0:
-            fopt_idx = y[y == f_opt].index[0]
-      else:
-            fopt_idx = y.idxmin()
 
       if proportion_of_best < 1:
             sorted_idx = y.sort_values().index
@@ -243,6 +237,13 @@ def calculate_fitness_distance_correlation(
             sorted_idx = sorted_idx[:round(len(sorted_idx)*proportion_of_best)]
             X = X.iloc[sorted_idx].reset_index(drop = True)
             y = y[sorted_idx].reset_index(drop = True)
+
+            if f_opt is None:
+                fopt_idx = y.idxmin()
+            elif len(y[y == f_opt]) > 0:
+                fopt_idx = y[y == f_opt].index[0]
+            else:
+                fopt_idx = y.idxmin()
 
       dist = squareform(pdist(X, metric = 'minkowski', p = minkowski_p))[fopt_idx]
       dist_mean = dist.mean()
