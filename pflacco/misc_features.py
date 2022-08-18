@@ -326,7 +326,7 @@ def calculate_length_scales_features(
       result = np.array(result)
       r_dist = pdist(result[:, :dim])
       r_fval = pdist(result[:, dim].reshape(len(result), 1), metric = 'cityblock')
-      r = r_fval/r_dist
+      r = np.divide(r_fval, r_dist, where=r_dist != 0)
       r = r[~np.isnan(r)]
       kernel = gaussian_kde(r)
       sample = np.random.uniform(low=r.min(), high=r.max(), size = sample_size_from_kde)
