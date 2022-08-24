@@ -4,3 +4,4 @@ build/
 dist/
 pflacco_venv/
 pflacco.egg-info/
+venv/
