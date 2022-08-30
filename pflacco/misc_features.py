@@ -40,7 +40,7 @@ def calculate_hill_climbing_features(
           Budget factor for each individual solver run. The realized budget
           is calculated with ``budget_factor_per_run * dim``, by default 1000.
       method : str, optional
-          Type of solver. Any of `scipy.optimize.minimize` can be used, by default 'L-BFGS-B'.
+          Type of solver. Any of `scipy.optimize.minimize <https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize.html>`_ can be used, by default 'L-BFGS-B'.
       minimize : bool, optional
           Indicator whether the objective function should be minimized or maximized, by default True.
       seed : Optional[int], optional
@@ -185,7 +185,7 @@ def calculate_fitness_distance_correlation(
       ----------
       X : Union[pd.DataFrame, np.ndarray, List[List[float]]]
           A collection-like object which contains a sample of the decision space.
-          Can be created with `sampling.create_initial_sample`.
+          Can be created with :py:func:`pflacco.sampling.create_initial_sample`.
       y : Union[pd.Series, np.ndarray, List[float]]
           A list-like object which contains the respective objective values of `X`.
       f_opt : Optional[float], optional
@@ -212,17 +212,11 @@ def calculate_fitness_distance_correlation(
       [2] Müller, C.L. and Sbalzarini, I.F., 2011, April.
           Global characterization of the CEC 2005 fitness landscapes using fitness-distance analysis.
           In European conference on the applications of evolutionary computation (pp. 294-303).
-
       """      
       start_time = time.monotonic()
       if proportion_of_best > 1 or proportion_of_best <= 0:
             raise ValueError('Proportion of the best samples must be in the interval (0, 1]')
-      '''
-      if not type(y) is not pd.Series:
-            y = pd.Series(y)
-      else:
-            y = y.reset_index(drop = True)
-      '''
+    
       X, y = _validate_variable_types(X, y)
 
       if not minimize:

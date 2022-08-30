@@ -4,12 +4,13 @@ For people who are not comfortable with R.
 ## Summary
 Feature-based landscape analysis of continuous and constrained optimization problems is now available in Python as well.
 This package provides a python interface to the R package [flacco](https://github.com/kerschke/flacco) by Pascal Kerschke in version v0.4.0.
-And know also a native Python implementation with additional features such as:
+And now it also provides a native Python implementation with additional features such as:
 - [Features for exploiting black-box optimization problem structure](https://pure.itu.dk/ws/files/76529050/bbo_lion7.pdf).
 - [Ruggedness, funnels and gradients in fitness landscapes and the effect on PSO performance](https://ieeexplore.ieee.org/abstract/document/6557671).
 - [Global characterization of the CEC 2005 fitness landscapes using fitness-distance analysis](https://publications.mpi-cbg.de/Müller_2011_5158.pdf).
 - [Analysing and characterising optimization problems using length scale](https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.709.9948&rep=rep1&type=pdf).
-- [Fitness Landscape Analysis Metrics based on Sobol Indices and Fitness-and State-Distributions.](https://d1wqtxts1xzle7.cloudfront.net/64119519/E-24133-with-cover-page-v2.pdf?Expires=1660259914&Signature=AFRODPsFafOvNWjio-CKpkqcUWISBObg5h8vKbTlYpZ1PG2fCtXmTZQnegNxyv8E-PS1AA-TbPau3EkA2oByRsajdtvFN3eVQJ7JeenQp0DPOMdCmTM8hWeP8kwvFZ7yug9DRv86aYbjxyiugaUNKF7cUDkt6grv329NVwtYN-OvoCLz-NIfoNTk41rUG~csRcXgBI~6AW1E1mjUAm1KGtNYXy3n3LPfTLeuQtHN2qFZAFPn4Yx1F~a68vVDfQ7UHBIOM5dFkJoETz7pq5ZdjzWp8rIBlgmdUtptgGIhws8m03nzDKS-OnjuKudNtnbwCdlSXjt-I59RRWp-FQynGQ__&Key-Pair-Id=APKAJLOHF5GGSLRBV4ZA).
+- [Fitness Landscape Analysis Metrics based on Sobol Indices and Fitness-and State-Distributions.](https://ieeexplore.ieee.org/document/9185716).
+- [Local optima networks for continuous fitness landscapes](https://dl.acm.org/doi/10.1145/3319619.3326852)
 
 The following is the description of the original flacco package:
 > flacco is a collection of features for Explorative Landscape Analysis (ELA) of single-objective, continuous (Black-Box-)Optimization Problems. It allows the user to quantify characteristics of an (unknown) optimization problem's landscape.
@@ -22,7 +23,7 @@ The following is the description of the original flacco package:
 
 The calculation procedure and further background information of ELA features is given in [Comprehensive Feature-Based Landscape Analysis of Continuous and Constrained Optimization Problems Using the R-Package flacco](https://arxiv.org/abs/1708.05258).
 ## Prerequisites
-For a stable (and tested) outcome, pflacco requires at least [Python>=3.6.4](https://www.python.org/downloads/release/python-364/)
+For a stable (and tested) outcome, pflacco requires at least [Python>=3.8](https://www.python.org/downloads/release/python-364/)
 
 ## Setup
 Easy as it usually is in Python:
@@ -62,6 +63,9 @@ lon = calculate_lon_features(nodes, edges)
 print(lon)
 
 ```
+
+## Documentation
+A comprehensive documentation can be found [here](https://pflacco.readthedocs.io/en/latest/index.html).
 
 ## Contact
 I endorse and appreciate every comment and participation. Feel free to contact me under raphael.prager@uni-muenster.de
