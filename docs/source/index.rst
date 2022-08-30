@@ -4,7 +4,7 @@
    contain the root `toctree` directive.
 
 Welcome to the documentation of pflacco
-===================================
+=======================================
 
 .. toctree::
    :maxdepth: 2
@@ -19,7 +19,7 @@ And now also a native Python implementation with additional features such as:
 * `Global characterization of the CEC 2005 fitness landscapes using fitness-distance analysis <https://publications.mpi-cbg.de/Müller_2011_5158.pdf>`_
 * `Analysing and characterising optimization problems using length scale <https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.709.9948&rep=rep1&type=pdf>`_
 * `Fitness Landscape Analysis Metrics based on Sobol Indices and Fitness-and State-Distributions <https://ieeexplore.ieee.org/document/9185716>`_
-* `Local optima networks for continuous fitness landscapes <https://dl.acm.org/doi/10.1145/3319619.3326852>`
+* `Local optima networks for continuous fitness landscapes <https://dl.acm.org/doi/10.1145/3319619.3326852>`_
 
 The conventional features are identical or equivalent to the implementation of the R-package flacco.
 To directly quote the documentation of flacco:

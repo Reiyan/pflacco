@@ -1,6 +1,6 @@
 .. _pflacco.misc_features:
-pflacco.misc_features module
-===================================
+pflacco.misc_features
+=====================
 
 .. automodule:: pflacco.misc_features
     :members:

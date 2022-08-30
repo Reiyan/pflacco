@@ -9,7 +9,8 @@
 project = 'pflacco'
 copyright = '2022, Raphael Patrick Prager'
 author = 'Raphael Patrick Prager'
-release = '1.0.0'
+version = '1.1'
+release = '1.1.0'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -31,4 +32,3 @@ exclude_patterns = []
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 html_theme = 'furo'
-html_static_path = ['_static']

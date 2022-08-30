@@ -1,13 +1,13 @@
 Getting Started
-=====
+===============
 
 Pflacco offers a variety of different landscape features. These are compartmentalized into three submodules:
 
 * :ref:`Conventional Exploratory Landscape Features <pflacco.classical_ela_features>`
 * :ref:`Local Optima Networks <pflacco.local_optima_network_features>`
-* :ref:`Miscellanous features <pflacco.misc_features>`, which are the product of recent advances in the research community. encompasses conventional Exploratory Landscape Features, Local Optima Networks
-as well as a variety of recent advances.
+* :ref:`Miscellanous features <pflacco.misc_features>`, which are the product of recent advances in the research community.
 
+The following code example provides a demonstration of the different submodules.
 
 .. code-block:: python3
 

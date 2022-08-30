@@ -1,5 +1,5 @@
-pflacco.sampling module
-===================================
+pflacco.sampling
+================
 
 .. automodule:: pflacco.sampling
     :members:
