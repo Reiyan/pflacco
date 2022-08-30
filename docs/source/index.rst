@@ -23,6 +23,7 @@ And now also a native Python implementation with additional features such as:
 
 The conventional features are identical or equivalent to the implementation of the R-package flacco.
 To directly quote the documentation of flacco:
+
 .. epigraph::
 
    flacco is a collection of features for Explorative Landscape Analysis (ELA) of single-objective, continuous (Black-Box-)Optimization Problems.
