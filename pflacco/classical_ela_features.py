@@ -56,7 +56,7 @@ def calculate_ela_meta(
       ----------
       X : Union[pd.DataFrame, np.ndarray, List[List[float]]]
           A collection-like object which contains a sample of the decision space.
-          Can be created with `sampling.create_initial_sample`.
+          Can be created with :py:func:`pflacco.sampling.create_initial_sample`.
       y : Union[pd.Series, np.ndarray, List[float]]
           A list-like object which contains the respective objective values of `X`.
 
@@ -145,7 +145,7 @@ def calculate_pca(
       ----------
       X : Union[pd.DataFrame, np.ndarray, List[List[float]]]
           A collection-like object which contains a sample of the decision space.
-          Can be created with `sampling.create_initial_sample`.
+          Can be created with :py:func:`pflacco.sampling.create_initial_sample`.
       y : Union[pd.Series, np.ndarray, List[float]]
           A list-like object which contains the respective objective values of `X`.
       prop_cov_x : float, optional
@@ -239,7 +239,7 @@ def calculate_nbc(
       ----------
       X : Union[pd.DataFrame, np.ndarray, List[List[float]]]
           A collection-like object which contains a sample of the decision space.
-          Can be created with `sampling.create_initial_sample`.
+          Can be created with :py:func:`pflacco.sampling.create_initial_sample`.
       y : Union[pd.Series, np.ndarray, List[float]]
           A list-like object which contains the respective objective values of `X`.
       fast_k : float, optional
@@ -338,7 +338,7 @@ def calculate_dispersion(
       ----------
       X : Union[pd.DataFrame, np.ndarray, List[List[float]]]
           A collection-like object which contains a sample of the decision space.
-          Can be created with `sampling.create_initial_sample`.
+          Can be created with :py:func:`pflacco.sampling.create_initial_sample`.
       y : Union[pd.Series, np.ndarray, List[float]]
           A list-like object which contains the respective objective values of `X`.
       disp_quantiles : List[float], optional
@@ -346,7 +346,7 @@ def calculate_dispersion(
           by default [0.02, 0.05, 0.1, 0.25].
       dist_method : str, optional
           Determines which distance method is used. The given value is passed over to
-          `scipy.spatial.distance.pdist`, by default 'euclidean'.
+          `scipy.spatial.distance.pdist <https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.distance.pdist.html>`_, by default 'euclidean'.
       dist_p : int, optional
           The p-norm to apply for Minkowski. This is only considered when
           `dist_method = 'minkowski'`, by default 2.
@@ -416,7 +416,7 @@ def calculate_information_content(
       ----------
       X : Union[pd.DataFrame, np.ndarray, List[List[float]]]
           A collection-like object which contains a sample of the decision space.
-          Can be created with `sampling.create_initial_sample`.
+          Can be created with :py:func:`pflacco.sampling.create_initial_sample`.
       y : Union[pd.Series, np.ndarray, List[float]]
           A list-like object which contains the respective objective values of `X`.
       ic_sorting : str, optional
@@ -597,7 +597,7 @@ def calculate_ela_distribution(
       ----------
       X : Union[pd.DataFrame, np.ndarray, List[List[float]]]
           A collection-like object which contains a sample of the decision space.
-          Can be created with `sampling.create_initial_sample`.
+          Can be created with :py:func:`pflacco.sampling.create_initial_sample`.
       y : Union[pd.Series, np.ndarray, List[float]]
           A list-like object which contains the respective objective values of `X`.
       ela_distr_skewness_type : int, optional
@@ -684,7 +684,7 @@ def calculate_limo(
       ----------
       X : Union[pd.DataFrame, np.ndarray, List[List[float]]]
           A collection-like object which contains a sample of the decision space.
-          Can be created with `sampling.create_initial_sample`.
+          Can be created with :py:func:`pflacco.sampling.create_initial_sample`.
       y : Union[pd.Series, np.ndarray, List[float]]
           A list-like object which contains the respective objective values of `X`.
       lower_bound : Union[List[float], float]
@@ -779,7 +779,7 @@ def calculate_cm_angle(
       ----------
       X : Union[pd.DataFrame, np.ndarray, List[List[float]]]
           A collection-like object which contains a sample of the decision space.
-          Can be created with `sampling.create_initial_sample`.
+          Can be created with :py:func:`pflacco.sampling.create_initial_sample`.
       y : Union[pd.Series, np.ndarray, List[float]]
           A list-like object which contains the respective objective values of `X`.
       lower_bound : Union[List[float], float]
@@ -874,7 +874,7 @@ def calculate_cm_conv(
       ----------
       X : Union[pd.DataFrame, np.ndarray, List[List[float]]]
           A collection-like object which contains a sample of the decision space.
-          Can be created with `sampling.create_initial_sample`.
+          Can be created with :py:func:`pflacco.sampling.create_initial_sample`.
       y : Union[pd.Series, np.ndarray, List[float]]
           A list-like object which contains the respective objective values of `X`.
       lower_bound : Union[List[float], float]
@@ -1039,7 +1039,7 @@ def calculate_cm_grad(
       ----------
       X : Union[pd.DataFrame, np.ndarray, List[List[float]]]
           A collection-like object which contains a sample of the decision space.
-          Can be created with `sampling.create_initial_sample`.
+          Can be created with :py:func:`pflacco.sampling.create_initial_sample`.
       y : Union[pd.Series, np.ndarray, List[float]]
           A list-like object which contains the respective objective values of `X`.
       lower_bound : Union[List[float], float]
@@ -1109,7 +1109,7 @@ def calculate_ela_conv(
       ----------
       X : Union[pd.DataFrame, np.ndarray, List[List[float]]]
           A collection-like object which contains a sample of the decision space.
-          Can be created with `sampling.create_initial_sample`.
+          Can be created with :py:func:`pflacco.sampling.create_initial_sample`.
       y : Union[pd.Series, np.ndarray, List[float]]
           A list-like object which contains the respective objective values of `X`.
       f : Callable[[List[float]], float]
@@ -1161,7 +1161,7 @@ def calculate_ela_level(
       ----------
       X : Union[pd.DataFrame, np.ndarray, List[List[float]]]
           A collection-like object which contains a sample of the decision space.
-          Can be created with `sampling.create_initial_sample`.
+          Can be created with :py:func:`pflacco.sampling.create_initial_sample`.
       y : Union[pd.Series, np.ndarray, List[float]]
           A list-like object which contains the respective objective values of `X`.
       ela_level_quantiles : List[float], optional
@@ -1270,7 +1270,7 @@ def calculate_ela_curvate(
       ----------
       X : Union[pd.DataFrame, np.ndarray, List[List[float]]]
           A collection-like object which contains a sample of the decision space.
-          Can be created with `sampling.create_initial_sample`.
+          Can be created with :py:func:`pflacco.sampling.create_initial_sample`.
       y : Union[pd.Series, np.ndarray, List[float]]
           A list-like object which contains the respective objective values of `X`.
       f : Callable[[List[float]], float]
@@ -1378,7 +1378,7 @@ def calculate_ela_local(
       ----------
       X : Union[pd.DataFrame, np.ndarray, List[List[float]]]
           A collection-like object which contains a sample of the decision space.
-          Can be created with `sampling.create_initial_sample`.
+          Can be created with :py:func:`pflacco.sampling.create_initial_sample`.
       y : Union[pd.Series, np.ndarray, List[float]]
           A list-like object which contains the respective objective values of `X`.
       f : Callable[[List[float]], float]
@@ -1395,7 +1395,7 @@ def calculate_ela_local(
           Factor which determines the number of local searches by
           `ela_local_local_searches_factor * dim`, by default 50.
       ela_local_optim_method : str, optional
-          Type of solver. Any of `scipy.optimize.minimize` can be used, by default 'L-BFGS-B'.
+          Type of solver. Any of `scipy.optimize.minimize <https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize.html>`_ can be used, by default 'L-BFGS-B'.
       ela_local_clust_method : str, optional
           Hierarchical clustering method to use, by default 'single'.
       seed : Optional[int], optional

@@ -120,7 +120,7 @@ def compute_local_optima_network(
         ``basin_hopping_iteration + 1`` runs of the local minimizer, by default 1000
     minimizer_kwargs : Optional[Dict[str, Any]], optional
         Extra keyword arguments to be passed to the local minimizer
-        ``scipy.optimize.minimize``, by default None.
+        `scipy.optimize.minimize <https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize.html>`_, by default None.
 
     Returns
     -------
@@ -179,10 +179,10 @@ def calculate_lon_features(
     ----------
     nodes : pd.DataFrame
         A dataframe containing all nodes of the LON.
-        Can be created via the function ``compute_local_optima_network``.
+        Can be created via the function :py:func:`pflacco.local_optima_network_features.compute_local_optima_network`.
     edges : pd.DataFrame
         A dataframe containg all edges of the LON.
-        Can be created via the function ``compute_local_optima_network``.
+        Can be created via the function :py:func:`pflacco.local_optima_network_features.compute_local_optima_network`.
     f_opt : float, optional
         Objective value of the global optimum (if known) of the objective
         function the LON was computed on, by default None.
