@@ -527,7 +527,7 @@ def calculate_information_content(
                         candidates = candidates[candidates != current]
                         dists[i] = distances[permutation[i - 1], currents == current][0]
                   else:
-                        nbrs2 = NearestNeighbors(n_neighbors = min(1, X.shape[0])).fit(X.iloc[candidates])
+                        nbrs2 = NearestNeighbors(n_neighbors = min(1, X.shape[0])).fit(X.iloc[candidates].to_numpy())
                         distances2, indices2, = nbrs2.kneighbors(X.iloc[permutation[i - 1]].to_numpy().reshape(1, X.shape[1]))
                         current = candidates[np.ravel(indices2)[0]]
                         permutation[i] = current
