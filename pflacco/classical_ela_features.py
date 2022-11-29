@@ -368,7 +368,7 @@ def calculate_dispersion(
       
       idx_in_quantiles = {}
       for idx, quantile in enumerate(quantiles):
-            idx_in_quantiles[str(disp_quantiles[idx])] = [x for x in y[y < quantile].index]
+            idx_in_quantiles[str(disp_quantiles[idx])] = [x for x in y[y <= quantile].index]
 
       dists = {}
       for quantile in idx_in_quantiles:
