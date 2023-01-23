@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 
 
 def test_validate_variable_types_column_names():
@@ -9,7 +10,13 @@ def test_validate_variable_types_column_names():
     
     X = create_initial_sample(2, sample_type = 'lhs')
     X.columns = ["a", "b"]
-    y = np.zeros(len(X))
+    y = pd.Series(np.zeros(len(X)), name="z")
     XX, yy = _validate_variable_types(X, y)
-    assert (X.columns == ["a", "b"]).all()
-    assert (XX.columns == ["x0", "x1"]).all()
+     
+    # X checks
+    assert all(X.columns == ["a", "b"])
+    assert all(XX.columns == ["x0", "x1"])
+
+    # Y checks
+    assert y.name == "z"
+    assert yy.name == "y"
