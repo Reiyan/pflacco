@@ -24,13 +24,16 @@ def _cartesian_product_efficient(arrays):
       return arr.reshape(-1, la)
 
 def _validate_variable_types(X, y):
+      # Validate X:
       if not isinstance(X, pd.DataFrame) and (isinstance(y, np.ndarray) or isinstance(y, list)):
             X = pd.DataFrame(X)
       elif not isinstance(X, pd.DataFrame):
             raise Exception('Unknown format of X. X must be either a Python list, numpy array oder pandas DataFrame')
 
-      X.columns = ['x' + str(x) for x in range(X.shape[1])]
       X = X.reset_index(drop = True)
+      X.columns = ['x' + str(x) for x in range(X.shape[1])]
+
+      # Validate y:
       if not isinstance(y, pd.Series) and (isinstance(y, np.ndarray) or isinstance(y, list)):
             y = pd.Series(y, name = 'y')
       y = y.reset_index(drop = True)
