@@ -74,8 +74,8 @@ def calculate_ela_meta(
       model.fit(X, y)
 
       lin_simple_intercept = model.intercept_
-      lin_simple_coef_min = model.coef_.min()
-      lin_simple_coef_max = model.coef_.max()
+      lin_simple_coef_min = np.abs(model.coef_).min()
+      lin_simple_coef_max = np.abs(model.coef_).max()
       lin_simple_coef_max_by_min = lin_simple_coef_max / lin_simple_coef_min
       lin_simple_adj_r2 = 1 - (1 - model.score(X, y)) * (len(y) - 1) / (len(y) - X.shape[1]-1)
       
@@ -98,12 +98,11 @@ def calculate_ela_meta(
       model = linear_model.LinearRegression()
       X_squared = pd.concat([X, X.pow(2).add_suffix('^2')], axis = 1)
       model.fit(X_squared, y)
-      pred = model.predict(X_squared)
 
       quad_simple_adj_r2 = 1 - (1 - model.score(X_squared, y)) * (len(y) - 1) / (len(y) - X_squared.shape[1]-1)
 
-      quad_model_con_min = np.absolute(model.coef_[int(X_squared.shape[1]/2):]).min()
-      quad_model_con_max = np.absolute(model.coef_[int(X_squared.shape[1]/2):]).max()
+      quad_model_con_min = np.abs(model.coef_[int(X_squared.shape[1]/2):]).min()
+      quad_model_con_max = np.abs(model.coef_[int(X_squared.shape[1]/2):]).max()
       quad_simple_cond = quad_model_con_max/quad_model_con_min
 
       # Create linear model with interaction
