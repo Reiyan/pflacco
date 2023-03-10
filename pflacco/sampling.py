@@ -2,8 +2,8 @@ import numpy as np
 import pandas as pd
 
 from pyDOE import lhs
-from SALib.sample import sobol_sequence
 from scipy.stats import levy
+from scipy.stats.qmc import Sobol
 from scipy.optimize import minimize as scipy_minimize
 from typing import List, Optional, Union
 
@@ -66,7 +66,8 @@ def create_initial_sample(
       if sample_type == 'lhs':
             X = lhs(dim, samples = n)
       elif sample_type == 'sobol':
-            X = sobol_sequence.sample(n, dim)
+            sampler = Sobol(d = dim)
+            X = sampler.random(n)
       else:
             X = np.random.rand(n, dim)
       
