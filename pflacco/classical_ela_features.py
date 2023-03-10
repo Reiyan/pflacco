@@ -14,7 +14,7 @@ from sklearn.neighbors import NearestNeighbors
 from sklearn.model_selection import StratifiedKFold
 
 from scipy.spatial.distance import pdist, squareform
-from scipy.stats import gaussian_kde
+from scipy.stats import gaussian_kde, pearsonr
 from scipy.optimize import minimize as scipy_minimize
 from scipy.cluster.hierarchy import linkage, cut_tree, _order_cluster_tree
 
@@ -233,7 +233,6 @@ def calculate_nbc(
       minimize: bool = True) -> Dict[str, Union[int, float]]:
       """Calculation of Nearest Better Clustering features, similar to the R-package `flacco`.
 
-
       Parameters
       ----------
       X : Union[pd.DataFrame, np.ndarray, List[List[float]]]
@@ -243,9 +242,12 @@ def calculate_nbc(
           A list-like object which contains the respective objective values of `X`.
       fast_k : float, optional
           Controls the percentage of observations that should be considered when looking
-          for the nearest better neighbour, by default 0.05.
+          for the nearest better neighbour quickly. If no better neighbour is found, the whole sample
+          is considered, by default 0.05.
       dist_tie_breaker : str, optional
-          Strategy to break ties between observations. Currently allows `sample`, by default 'sample'.
+          Strategy to break ties between observations. Currently allows `sample` (which samples randomly),
+          `first` (which deterministically picks the first found occurence),
+          and `last` (which deterministically picks the last found occurence), by default 'sample'.
       minimize : bool, optional
           Indicator whether the objective function should be minimized or maximized, by default True.
 
@@ -256,6 +258,7 @@ def calculate_nbc(
       """      
       start_time = time.monotonic()
       X, y = _validate_variable_types(X, y)
+      y = y.to_numpy()
 
       if fast_k < 1:
             fast_k = math.ceil(fast_k * X.shape[0])
@@ -268,59 +271,74 @@ def calculate_nbc(
       distances, indices = nbrs.kneighbors(X)
       results = []
       for idx in range(X.shape[0]):
+            # for every sample 'idx' find the BETTER neighbours 'nnb' out of the 'fast_k' nearest neighbours
             y_rec = y[idx]
             ind_nn = indices[idx][1:]
             y_near = y[ind_nn]
             better = y_near < y_rec
+            # if |nnb| > 0 get the nearest better neighbour and store the current 'idx', the index of the nearest better neigbhour
+            # and the distance between them
             if sum(better) > 0:
-                  better = better.reset_index(drop = True)
-                  b_idx = better.idxmax()
+                  b_idx = np.argmax(better)
                   results.append([idx, ind_nn[b_idx], distances[idx][b_idx + 1]])
+
+            # if |nnb| = 0, we get the nearest better neighbour of all possible neighbours (which takes substianlly more time)
+            # and store the current 'idx', the index of the nearest better neigbhour, and the distance between them
             else:
-                  ind_alt = np.array([x for x in range(X.shape[0]) if x not in ind_nn and x != idx])
+                  ind_alt = np.setdiff1d(np.arange(X.shape[0]), indices[idx])
                   if sum(y[ind_alt] < y_rec) != 0:
-                        ind_alt = ind_alt[y[ind_alt] < y_rec] #TODO: check
+                        ind_alt = ind_alt[y[ind_alt] < y_rec]
                   elif sum(y[ind_alt] == y_rec) != 0:
-                        ind_alt = ind_alt[y[ind_alt] == y_rec] #TODO: check
+                        ind_alt = ind_alt[y[ind_alt] == y_rec]
                   else:
-                        results.append([idx, None, None])
+                        results.append([idx, np.nan, np.nan])
                         continue
                   if len(ind_alt) == 1:
                         results.append([idx, ind_alt[0], math.sqrt((X.iloc[ind_alt[0]] - X.iloc[idx]).pow(2).sum())])
                   else:
                         d = np.sqrt((X.iloc[ind_alt] - X.iloc[idx]).pow(2).sum(axis = 1)).reset_index(drop = True)
-                        if dist_tie_breaker == 'sample':
-                              j = np.random.choice(d[d == d.min()].index)
-                              results.append([idx, ind_alt[j], d[j]])
-                        else:
-                              #TODO welche anderen Tiebreaker methoden gibt es? es gibt noch first und last
-                              raise ValueError('Currently, the only available tie breaker method is "sample"')
+                        # Get nearest neighbour in terms of distance
+                        i = d[d == d.min()].index.to_numpy()
+                        # If ties are present, they can be resolved randomly or by taking the first or last index.
+                        if len(i) > 1:
+                              if dist_tie_breaker == 'sample':
+                                    i = np.random.choice(i)
+                              elif dist_tie_breaker == 'first':
+                                    i = i[0]
+                              elif dist_tie_breaker == 'last':
+                                    i = i[-1]
+                              else:
+                                    raise ValueError('Possible tie breaker methods are "sample", "first", and "last"')
 
-      nb_stats = pd.DataFrame(results, columns = ['ownID', 'nbID', 'nbDist'])
-      nb_stats['nearDist'] = [x[1] for x in distances]
-      nb_stats['nb_near_ratio'] = nb_stats['nbDist'] / nb_stats['nearDist']
-      nb_stats['fitness'] = y
-      
+                        results.append([idx, ind_alt[i], d[i]])
+
+      nb_stats = np.array(results, dtype=np.float64)
+      near_dist = np.array([x[1] for x in distances])
+      near_better_dist = nb_stats[:, 2]
+      nb_near_ratio = np.divide(near_better_dist, near_dist).reshape(-1, 1)
+      nb_stats = np.hstack((nb_stats, near_dist.reshape(-1, 1), nb_near_ratio, y.reshape(-1, 1)))
+
       results = []
-      for own_id in nb_stats['ownID']:
-            x = nb_stats[nb_stats['nbID'] == own_id].index
-            count = len(x)
+      for own_id in range(X.shape[0]):
+            x = nb_stats[:, 1] == own_id
+            count = sum(x)
             if count > 0:
-                  to_me_dist = nb_stats['nbDist'][x].median()
-                  results.append([count, to_me_dist, nb_stats['nbDist'][own_id]/to_me_dist])
+                  to_me_dist = np.nanmedian(near_better_dist[x])
+                  results.append([count, to_me_dist, near_better_dist[own_id]/to_me_dist])
             else:
-                  results.append([0, None, None])
- 
-      nb_stats = pd.concat([nb_stats, pd.DataFrame(results, columns = ['toMe_count', 'toMe_dist_median', 'nb_median_toMe_ration'])], axis = 1)
-      #nb_stats['nbDist'][nb_stats['nbDist'].isna()] = nb_stats['nearDist'][nb_stats['nbDist'].isna()]
-      dist_ratio = nb_stats['nearDist'] / nb_stats['nbDist']
+                  results.append([0, np.nan, np.nan])
+      
+      results = np.array(results)
+      # Replace possible NA values (occuring when no better nearer neighbour is found) with the distance to the closest nearest neighbour
+      near_better_dist[np.isnan(near_better_dist)] = near_dist[np.isnan(near_better_dist)]
+      dist_ratio = np.divide(near_dist, near_better_dist)
 
       return {
-            'nbc.nn_nb.sd_ratio': nb_stats['nearDist'].std() / nb_stats['nbDist'].std(),
-            'nbc.nn_nb.mean_ratio': nb_stats['nearDist'].mean() / nb_stats['nbDist'].mean(),
-            'nbc.nn_nb.cor': nb_stats['nearDist'].corr(nb_stats['nbDist']),
-            'nbc.dist_ratio.coeff_var': dist_ratio.std()/dist_ratio.mean(),
-            'nbc.nb_fitness.cor': nb_stats['toMe_count'].corr(nb_stats['fitness']),
+            'nbc.nn_nb.sd_ratio': np.std(near_dist, ddof = 1) / np.std(near_better_dist, ddof = 1),
+            'nbc.nn_nb.mean_ratio': np.mean(near_dist) / np.mean(near_better_dist),
+            'nbc.nn_nb.cor': pearsonr(near_dist, near_better_dist)[0],
+            'nbc.dist_ratio.coeff_var': np.nanstd(dist_ratio, ddof = 1) / np.nanmean(dist_ratio),
+            'nbc.nb_fitness.cor': pearsonr(results[:, 0], y)[0],
             'nbc.costs_runtime': timedelta(seconds=time.monotonic() - start_time).total_seconds()
       }
 
