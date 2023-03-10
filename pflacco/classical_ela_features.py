@@ -168,6 +168,8 @@ def calculate_pca(
       start_time = time.monotonic()
       X, y = _validate_variable_types(X, y)
 
+      # Change name of series for sklearn pca
+      y.rename('y', inplace=True)
       df = pd.concat([X,y], axis = 1)
       
       # cov_x
