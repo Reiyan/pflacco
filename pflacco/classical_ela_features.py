@@ -23,12 +23,12 @@ from typing import Callable, Dict, List, Optional, Union
 from .utils import _determine_max_n_blocks, _create_blocks, _validate_variable_types, _transform_bounds_to_canonical, _check_blocks_variable, _cartesian_product_efficient
 
 
-def _calculate_num_derivate(f, lower_bound, upper_bound, delta, eps, zero_tol, r, v, x):
+def _calculate_num_derivate(f, lower_bound, upper_bound, delta, eps, zero_tol, x):
       h0 = np.abs(delta * x) + eps * (np.abs(x) < zero_tol)
       side = 1 * ((x - lower_bound) <= h0) - 1 * ((upper_bound - x) <= h0)
       side = np.array([np.nan if x == 0 else x for x in side])
 
-      grad = np.abs(Gradient(f, method = 'complex')(x))
+      grad = np.abs(Gradient(f, method = 'central')(x))
       if grad.min() > 0:
             gr_scale = grad.max()/grad.min()
             gr_scale_norm = np.sqrt(np.sum(gr_scale) ** 2)
@@ -37,7 +37,7 @@ def _calculate_num_derivate(f, lower_bound, upper_bound, delta, eps, zero_tol, r
             gr_scale = np.nan
             gr_scale_norm = np.nan
       
-      hess = Hessian(f, method = 'complex')(x)
+      hess = Hessian(f, method = 'central')(x)
       eig = np.abs(np.linalg.eig(hess)[0])
       
       if eig.min() > 0:
@@ -1260,8 +1260,6 @@ def calculate_ela_curvate(
       delta: float = 10**-4,
       eps: float = 10**-4,
       zero_tol: float = np.sqrt(np.nextafter(0, 1)/70**-7),
-      r: int = 4,
-      v: int = 2,
       seed: Optional[int] = None) -> Dict[str, Union[int, float]]:
       """Calculation of ELA Curvature features, similar to the R-package `flacco`.
 
@@ -1291,12 +1289,6 @@ def calculate_ela_curvate(
       zero_tol : float, optional
           Parameter used to approximate the gradient and hessian.
           See `grad` and `hessian` of the R-package numDeriv for more details, by default np.sqrt(np.nextafter(0, 1)/70**-7).
-      r : int, optional
-          Parameter used to approximate the gradient and hessian.
-          See `grad` and `hessian` of the R-package numDeriv for more details, by default 4.
-      v : int, optional
-          Parameter used to approximate the gradient and hessian.
-          See `grad` and `hessian` of the R-package numDeriv for more details, by default 2.
       seed : Optional[int], optional
           Seed for reproducability, by default None.
 
