@@ -618,9 +618,21 @@ def calculate_ela_distribution(
       y : Union[pd.Series, np.ndarray, List[float]]
           A list-like object which contains the respective objective values of `X`.
       ela_distr_skewness_type : int, optional
-          Integer indicating which algorithm to use, by default 3.
+          Integer indicating which algorithm to use, by default 3:
+          Type 1:
+          g_1 = m_3 / m_2^(3/2). Typical definition in older textbooks.
+          Type 2:
+          G_1 = g_1 * sqrt(n(n-1)) / (n-2). Used in SAS and SPSS.
+          Type 3:
+          b_1 = m_3 / s^3 = g_1 ((n-1)/n)^(3/2). Used in MINITAB and BMDP.
       ela_distr_kurtosis_type : int, optional
-          Integer indicating which algorithm to use, by default 3.
+          Integer indicating which algorithm to use, by default 3:
+          Type 1:
+          g_2 = m_4 / m_2^2 - 3. Typical definition in older textbooks.
+          Type 2:
+          G_2 = ((n+1) g_2 + 6) * (n-1) / ((n-2)(n-3)). Used in SAS and SPSS.
+          Type 3:
+          b_2 = m_4 / s^4 - 3 = (g_2 + 3) (1 - 1/n)^2 - 3. Used in MINITAB and BMDP.
 
       Returns
       -------
