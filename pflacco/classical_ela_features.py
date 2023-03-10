@@ -1347,7 +1347,7 @@ def calculate_ela_curvate(
       original_f = f
       f = partial(decorator, original_f)
 
-      wfunc = partial(_calculate_num_derivate, f, lower_bound, upper_bound, delta, eps, zero_tol, r, v)
+      wfunc = partial(_calculate_num_derivate, f, lower_bound, upper_bound, delta, eps, zero_tol)
       derivs = X.sample(N).apply(lambda x: wfunc(x.values), axis = 1)
       derivs = np.array([x for x in derivs]).reshape(3, derivs.shape[0])
       
