@@ -15,7 +15,8 @@ def create_initial_sample(
       sample_coefficient: int = 50,
       lower_bound: Union[List[float], float] = 0,
       upper_bound: Union[List[float], float] = 1,
-      sample_type: str = 'lhs') -> pd.DataFrame:
+      sample_type: str = 'lhs',
+      seed: Optional[int] = None) -> pd.DataFrame:
       """Sampling of the decision space.
 
       Parameters
@@ -34,6 +35,8 @@ def create_initial_sample(
           Upper bound of variables of the decision space, by default 1.
       sample_type : str, optional
           Type of sampling strategy. Should be one of ('lhs', 'random', 'sobol'), by default 'lhs'.
+      seed : Optional[int], optional
+          Seed for reproducability, by default None
 
       Returns
       -------
@@ -63,10 +66,13 @@ def create_initial_sample(
       if n is None:
             n = dim * sample_coefficient
 
+      if seed is not None:
+            np.random.seed(seed)
+
       if sample_type == 'lhs':
             X = lhs(dim, samples = n)
       elif sample_type == 'sobol':
-            sampler = Sobol(d = dim)
+            sampler = Sobol(d = dim, seed = 50)
             X = sampler.random(n)
       else:
             X = np.random.rand(n, dim)
