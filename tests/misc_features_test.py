@@ -2,7 +2,7 @@ import os
 import pandas as pd
 import pytest
 
-from ioh import get_problem, ProblemType
+from ioh import get_problem
 from pflacco.misc_features import *
 
 DIMS = [2, 5, 10]
@@ -18,7 +18,7 @@ def test_calculate_fitness_distance_correlation(x_samples, feature_values):
     for fid in range(1,25):
         for dim in DIMS:
             tmp = x_samples.iloc[:(dim*50), :dim]
-            f = get_problem(fid, 1, dim, ProblemType.BBOB)
+            f = get_problem(fid, 1, dim)
             y = tmp.apply(lambda x: f(x), axis = 1)
             features = calculate_fitness_distance_correlation(tmp, y)
             data = pd.DataFrame(features, index = [0])
@@ -33,7 +33,7 @@ def test_calculate_hill_climbing_features(feature_values):
     result = []
     for fid in range(1,25):
         for dim in DIMS:
-            f = get_problem(fid, 1, dim, ProblemType.BBOB)
+            f = get_problem(fid, 1, dim)
             features = calculate_hill_climbing_features(f, dim, lower_bound = -5, upper_bound = 5, seed = 200)
             data = pd.DataFrame(features, index = [0])
             data['fid'] = fid
@@ -47,7 +47,7 @@ def test_calculate_gradient_features(feature_values):
     result = []
     for fid in range(1,25):
         for dim in DIMS:
-            f = get_problem(fid, 1, dim, ProblemType.BBOB)
+            f = get_problem(fid, 1, dim)
             features = calculate_gradient_features(f, dim, lower_bound=-5, upper_bound=5, seed = 200, budget_factor_per_dim = 10)
             data = pd.DataFrame(features, index = [0])
             data['fid'] = fid
@@ -62,7 +62,7 @@ def test_calculate_length_scales_features(feature_values):
     result = []
     for fid in range(1,25):
         for dim in DIMS:
-            f = get_problem(fid, 1, dim, ProblemType.BBOB)
+            f = get_problem(fid, 1, dim)
             features = calculate_length_scales_features(f, dim, lower_bound=-5, upper_bound=5, seed = 200, budget_factor_per_dim = 10)
             data = pd.DataFrame(features, index = [0])
             data['fid'] = fid
@@ -76,7 +76,7 @@ def test_calculate_sobol_indices_features(feature_values):
     result = []
     for fid in range(1,25):
         for dim in DIMS:
-            f = get_problem(fid, 1, dim, ProblemType.BBOB)
+            f = get_problem(fid, 1, dim)
             features = calculate_sobol_indices_features(f, dim, lower_bound=-5, upper_bound=5, seed = 200, sampling_coefficient = 100)
             data = pd.DataFrame(features, index = [0])
             data['fid'] = fid

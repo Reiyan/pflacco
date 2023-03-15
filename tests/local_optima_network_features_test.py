@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 import pytest
-from ioh import get_problem, ProblemType
+from ioh import get_problem
 from pflacco.local_optima_network_features import compute_local_optima_network, calculate_lon_features
 
 DIMS = [2, 5, 10]
@@ -16,7 +16,7 @@ def test_calculate_lon_features(feature_values):
     result = []
     for fid in range(1,25):
         for dim in DIMS:
-            f = get_problem(fid, 1, dim, ProblemType.BBOB)
+            f = get_problem(fid, 1, dim)
             nodes, edges = compute_local_optima_network(f, dim, lower_bound=-5, upper_bound=5, seed = 200, basin_hopping_iteration = 10, stopping_threshold= 100)
             features = calculate_lon_features(nodes, edges)
             data = pd.DataFrame(features, index = [0])
