@@ -1133,7 +1133,8 @@ def calculate_ela_conv(
       y: Union[pd.Series, np.ndarray, List[float]],
       f: Callable[[List[float]], float],
       ela_conv_nsample: int = 1000,
-      ela_conv_threshold: float = 1e-10) -> Dict[str, Union[int, float]]:
+      ela_conv_threshold: float = 1e-10,
+      seed: Optional[int] = None) -> Dict[str, Union[int, float]]:
       """Calculation of ELA Convexity features, similar to the R-package `flacco`.
 
       Parameters
@@ -1150,6 +1151,8 @@ def calculate_ela_conv(
       ela_conv_threshold : float, optional
           Threshold of the linearity, i.e., the tolerance to/deviation from perfect linearity,
           in order to still be considered linear, by default 1e-10.
+      seed : Optional[int], optional
+          Seed for reproducability, by default None.
 
       Returns
       -------
@@ -1158,6 +1161,10 @@ def calculate_ela_conv(
       """      
       start_time = time.monotonic()
       X, y = _validate_variable_types(X, y)
+
+      if seed is not None:
+            np.random.seed(seed)
+
       delta = []
       nfev = 0
       for _ in range(ela_conv_nsample):
