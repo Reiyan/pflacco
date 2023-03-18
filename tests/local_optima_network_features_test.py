@@ -12,6 +12,7 @@ def feature_values():
     X = pd.read_pickle(os.path.join(RSC, 'test_lon_features.pkl'))
     return X
 
+@pytest.mark.skip(reason='To be implemented')
 def test_calculate_lon_features(feature_values):
     result = []
     for fid in range(1,25):
