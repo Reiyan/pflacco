@@ -1,9 +1,10 @@
 import os
 import pandas as pd
 import pytest
+import platform
 
-from pandas.testing import assert_frame_equal
 from ioh import get_problem
+from pandas.testing import assert_frame_equal
 from pflacco.classical_ela_features import *
 from pflacco.sampling import create_initial_sample
 
@@ -12,6 +13,15 @@ RSC = os.path.join('tests', 'resources')
 
 @pytest.fixture
 def feature_values():
+    if platform.system() == 'Windows': 
+        RSC = os.path.join(RSC, 'windows')
+    elif platform.system() == 'Linux':
+        RSC = os.path.join(RSC, 'linux')
+    elif platform.system() == 'Darwin':
+        RSC = os.path.join(RSC, 'darwin')
+    else:
+        raise RuntimeError('Could not determine the system platform and therefore not load the appropriate test files.')
+        
     X = pd.read_pickle(os.path.join(RSC, 'test_classical_ela_features.pkl'))
     return X
 
@@ -27,7 +37,7 @@ def test_calculate_ela_meta(x_samples, feature_values):
             data['fid'] = fid
             data['dim'] = dim
             result.append(data)
-    result = pd.concat(result).reset_index(drop = True).round(decimals = 8)
+    result = pd.concat(result).reset_index(drop = True)
     colnames = result.columns[~result.columns.str.contains('costs_runtime')]
     assert_frame_equal(result[colnames], feature_values[colnames])
     assert (assert_frame_equal(result[colnames], feature_values[colnames], atol = 1e-5) is None)
@@ -46,9 +56,9 @@ def test_calculate_ela_distr(x_samples, feature_values):
             data['fid'] = fid
             data['dim'] = dim
             result.append(data)
-    result = pd.concat(result).reset_index(drop = True).round(decimals = 8)
+    result = pd.concat(result).reset_index(drop = True)
     colnames = result.columns[~result.columns.str.contains('costs_runtime')]
-    assert (assert_frame_equal(result[colnames], feature_values[colnames], atol = 1e-5) is None)
+    assert (assert_frame_equal(result[colnames], feature_values[colnames]) is None)
     #assert result[colnames].equals(feature_values[colnames])
 
 @pytest.mark.skip(reason='To be implemented')
@@ -64,9 +74,9 @@ def test_calculate_ela_level(x_samples, feature_values):
             data['fid'] = fid
             data['dim'] = dim
             result.append(data)
-    result = pd.concat(result).reset_index(drop = True).round(decimals = 8)
+    result = pd.concat(result).reset_index(drop = True)
     colnames = result.columns[~result.columns.str.contains('costs_runtime')]
-    assert (assert_frame_equal(result[colnames], feature_values[colnames], atol = 1e-5) is None)
+    assert (assert_frame_equal(result[colnames], feature_values[colnames]) is None)
     #assert result[colnames].equals(feature_values[colnames])
 
 def test_calculate_nbc(x_samples, feature_values):
@@ -81,9 +91,9 @@ def test_calculate_nbc(x_samples, feature_values):
             data['fid'] = fid
             data['dim'] = dim
             result.append(data)
-    result = pd.concat(result).reset_index(drop = True).round(decimals = 8)
+    result = pd.concat(result).reset_index(drop = True)
     colnames = result.columns[~result.columns.str.contains('costs_runtime')]
-    assert (assert_frame_equal(result[colnames], feature_values[colnames], atol = 1e-5) is None)
+    assert (assert_frame_equal(result[colnames], feature_values[colnames]) is None)
 
     #assert result[colnames].equals(feature_values[colnames])
 
@@ -100,9 +110,9 @@ def test_calculate_disp(x_samples, feature_values):
             data['fid'] = fid
             data['dim'] = dim
             result.append(data)
-    result = pd.concat(result).reset_index(drop = True).round(decimals = 8)
+    result = pd.concat(result).reset_index(drop = True)
     colnames = result.columns[~result.columns.str.contains('costs_runtime')]
-    assert (assert_frame_equal(result[colnames], feature_values[colnames], atol = 1e-5) is None)
+    assert (assert_frame_equal(result[colnames], feature_values[colnames]) is None)
 
     #assert result[colnames].equals(feature_values[colnames])
 
@@ -119,9 +129,9 @@ def test_calculate_pca(x_samples, feature_values):
             data['fid'] = fid
             data['dim'] = dim
             result.append(data)
-    result = pd.concat(result).reset_index(drop = True).round(decimals = 8)
+    result = pd.concat(result).reset_index(drop = True)
     colnames = result.columns[~result.columns.str.contains('costs_runtime')]
-    assert (assert_frame_equal(result[colnames], feature_values[colnames], atol = 1e-5) is None)
+    assert (assert_frame_equal(result[colnames], feature_values[colnames]) is None)
 
     #assert result[colnames].equals(feature_values[colnames])
 
@@ -140,9 +150,9 @@ def test_calculate_ela_local(x_samples, feature_values):
             data['fid'] = fid
             data['dim'] = dim
             result.append(data)
-    result = pd.concat(result).reset_index(drop = True).round(decimals = 8)
+    result = pd.concat(result).reset_index(drop = True)
     colnames = result.columns[~result.columns.str.contains('costs_runtime')]
-    assert (assert_frame_equal(result[colnames], feature_values[colnames], atol = 1e-5) is None)
+    assert (assert_frame_equal(result[colnames], feature_values[colnames]) is None)
 
     #assert result[colnames].equals(feature_values[colnames])
 
@@ -159,9 +169,9 @@ def test_calculate_ela_curvate(x_samples, feature_values):
             data['fid'] = fid
             data['dim'] = dim
             result.append(data)
-    result = pd.concat(result).reset_index(drop = True).round(decimals = 8)
+    result = pd.concat(result).reset_index(drop = True)
     colnames = result.columns[~result.columns.str.contains('costs_runtime')]
-    assert (assert_frame_equal(result[colnames], feature_values[colnames], atol = 1e-5) is None)
+    assert (assert_frame_equal(result[colnames], feature_values[colnames]) is None)
 
     #assert result[colnames].equals(feature_values[colnames])
 
@@ -178,9 +188,9 @@ def test_calculate_ela_conv(x_samples, feature_values):
             data['fid'] = fid
             data['dim'] = dim
             result.append(data)
-    result = pd.concat(result).reset_index(drop = True).round(decimals = 8)
+    result = pd.concat(result).reset_index(drop = True)
     colnames = result.columns[~result.columns.str.contains('costs_runtime')]
-    assert (assert_frame_equal(result[colnames], feature_values[colnames], atol = 1e-5) is None)
+    assert (assert_frame_equal(result[colnames], feature_values[colnames]) is None)
 
     #assert result[colnames].equals(feature_values[colnames])
 
@@ -197,9 +207,9 @@ def test_calculate_information_content(x_samples, feature_values):
             data['fid'] = fid
             data['dim'] = dim
             result.append(data)
-    result = pd.concat(result).reset_index(drop = True).round(decimals = 8)
+    result = pd.concat(result).reset_index(drop = True)
     colnames = result.columns[~result.columns.str.contains('costs_runtime')]
-    assert (assert_frame_equal(result[colnames], feature_values[colnames], atol = 1e-5) is None)
+    assert (assert_frame_equal(result[colnames], feature_values[colnames]) is None)
 
     #assert result[colnames].equals(feature_values[colnames])
 
@@ -218,6 +228,6 @@ def test_calculate_cell_mapping(feature_values):
             data['fid'] = fid
             data['dim'] = dim
             result.append(data)
-    result = pd.concat(result).reset_index(drop = True).round(decimals = 8)
+    result = pd.concat(result).reset_index(drop = True)
     colnames = result.columns[~result.columns.str.contains('costs_runtime')]
     assert result[colnames].equals(feature_values[colnames])
