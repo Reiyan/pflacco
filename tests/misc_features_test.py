@@ -22,7 +22,6 @@ def feature_values():
     X = pd.read_pickle(os.path.join(RSC, 'test_misc_ela_features.pkl'))
     return X
 
-@pytest.mark.skip(reason='To be implemented')
 def test_calculate_fitness_distance_correlation(x_samples, feature_values):
     result = []
     for fid in range(1,25):
@@ -39,7 +38,6 @@ def test_calculate_fitness_distance_correlation(x_samples, feature_values):
     colnames = result.columns[~result.columns.str.contains('costs_runtime')]
     assert result[colnames].equals(feature_values[colnames])
 
-@pytest.mark.skip(reason='To be implemented')
 def test_calculate_hill_climbing_features(feature_values):
     result = []
     for fid in range(1,25):
@@ -54,7 +52,6 @@ def test_calculate_hill_climbing_features(feature_values):
     colnames = result.columns[~result.columns.str.contains('costs_runtime')]
     assert result[colnames].equals(feature_values[colnames])
 
-@pytest.mark.skip(reason='To be implemented')
 def test_calculate_gradient_features(feature_values):
     result = []
     for fid in range(1,25):
@@ -69,7 +66,6 @@ def test_calculate_gradient_features(feature_values):
     colnames = result.columns[~result.columns.str.contains('costs_runtime')]
     assert result[colnames].equals(feature_values[colnames])
 
-@pytest.mark.skip(reason='Setting seeds is currently not possible in LS features')
 def test_calculate_length_scales_features(feature_values):
     result = []
     for fid in range(1,25):
@@ -84,7 +80,6 @@ def test_calculate_length_scales_features(feature_values):
     colnames = result.columns[~result.columns.str.contains('costs_runtime')]
     assert result[colnames].equals(feature_values[colnames])
 
-@pytest.mark.skip(reason='To be implemented')
 def test_calculate_sobol_indices_features(feature_values):
     result = []
     for fid in range(1,25):
