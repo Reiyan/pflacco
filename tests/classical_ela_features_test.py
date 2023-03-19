@@ -10,18 +10,17 @@ from pflacco.sampling import create_initial_sample
 
 DIMS = [2, 5, 10]
 RSC = os.path.join('tests', 'resources')
+if platform.system() == 'Windows': 
+    RSC = os.path.join(RSC, 'windows')
+elif platform.system() == 'Linux':
+    RSC = os.path.join(RSC, 'linux')
+elif platform.system() == 'Darwin':
+    RSC = os.path.join(RSC, 'darwin')
+else:
+    raise RuntimeError('Could not determine the system platform and therefore not load the appropriate test files.')
 
 @pytest.fixture
 def feature_values():
-    if platform.system() == 'Windows': 
-        RSC = os.path.join(RSC, 'windows')
-    elif platform.system() == 'Linux':
-        RSC = os.path.join(RSC, 'linux')
-    elif platform.system() == 'Darwin':
-        RSC = os.path.join(RSC, 'darwin')
-    else:
-        raise RuntimeError('Could not determine the system platform and therefore not load the appropriate test files.')
-        
     X = pd.read_pickle(os.path.join(RSC, 'test_classical_ela_features.pkl'))
     return X
 

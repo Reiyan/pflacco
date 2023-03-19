@@ -1,5 +1,6 @@
 import os
 import pandas as pd
+import platform
 import pytest
 
 from ioh import get_problem
@@ -7,6 +8,14 @@ from pflacco.misc_features import *
 
 DIMS = [2, 5, 10]
 RSC = os.path.join('tests', 'resources')
+if platform.system() == 'Windows': 
+    RSC = os.path.join(RSC, 'windows')
+elif platform.system() == 'Linux':
+    RSC = os.path.join(RSC, 'linux')
+elif platform.system() == 'Darwin':
+    RSC = os.path.join(RSC, 'darwin')
+else:
+    raise RuntimeError('Could not determine the system platform and therefore not load the appropriate test files.')
 
 @pytest.fixture
 def feature_values():
