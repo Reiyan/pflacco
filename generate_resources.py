@@ -58,7 +58,7 @@ def gen_classical_features():
             
     result = pd.concat(result).reset_index(drop=True)
     result = result[result.columns[~result.columns.str.contains('costs_runtime')]]
-    result = result.sort_values(by = ['fid', 'dim']).reset_index(drop = True).round(decimals = 8)
+    result = result.sort_values(by = ['fid', 'dim']).reset_index(drop = True)
     result.to_pickle(os.path.join(RSC, 'test_classical_ela_features.pkl'))
 
 def gen_cell_features():
@@ -81,7 +81,7 @@ def gen_cell_features():
             
     result = pd.concat(result).reset_index(drop=True)
     result = result[result.columns[~result.columns.str.contains('costs_runtime')]]
-    result = result.sort_values(by = ['fid', 'dim']).reset_index(drop = True).round(decimals = 8)
+    result = result.sort_values(by = ['fid', 'dim']).reset_index(drop = True)
     result.to_pickle(os.path.join(RSC, 'test_cm_ela_features.pkl'))
 
 
@@ -104,7 +104,7 @@ def gen_misc_features():
             
     result = pd.concat(result).reset_index(drop=True)
     result = result[result.columns[~result.columns.str.contains('costs_runtime')]]
-    result = result.sort_values(by = ['fid', 'dim']).reset_index(drop = True).round(decimals = 8)
+    result = result.sort_values(by = ['fid', 'dim']).reset_index(drop = True)
     result.to_pickle(os.path.join(RSC, 'test_misc_ela_features.pkl'))
 
 def gen_lon_features():
@@ -121,7 +121,7 @@ def gen_lon_features():
             result.append(data)
     result = pd.concat(result).reset_index(drop=True)
     result = result[result.columns[~result.columns.str.contains('costs_runtime')]]
-    result = result.sort_values(by = ['fid', 'dim']).reset_index(drop = True).round(decimals = 8)
+    result = result.sort_values(by = ['fid', 'dim']).reset_index(drop = True)
     result.to_pickle(os.path.join(RSC, 'test_lon_features.pkl'))
 
 def lon_investigation():
