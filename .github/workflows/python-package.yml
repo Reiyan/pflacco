@@ -34,7 +34,7 @@ jobs:
         python -m pip install -r requirements.txt -r requirements_test.txt
         python generate_resources.py
     - name: Generate Test Data
-        uses: actions/upload-artifact@v3
-        with:
-          name: test_data
-          path: tests/resources/
+      uses: actions/upload-artifact@v3
+      with:
+        name: test_data
+        path: tests/resources/
