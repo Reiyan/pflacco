@@ -40,7 +40,6 @@ def test_calculate_ela_meta(x_samples, feature_values):
             result.append(data)
     result = pd.concat(result).reset_index(drop = True)
     colnames = result.columns[~result.columns.str.contains('costs_runtime')]
-    assert_frame_equal(result[colnames], feature_values[colnames])
     assert (assert_frame_equal(result[colnames], feature_values[colnames]) is None)
 
 def test_calculate_ela_distr(x_samples, feature_values):

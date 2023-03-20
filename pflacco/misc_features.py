@@ -315,7 +315,7 @@ def calculate_length_scales_features(
       result = []
       nfev = 0
       for _ in range(budget_factor_per_dim * (dim ** 2)):
-            x = _levy_random_walk(x)
+            x = _levy_random_walk(x, seed = seed)
             x = np.array([np.clip(x[i], bounds[i][0], bounds[i][1]) for i in range(len(x))])
             fval = f(x)
             nfev += 1
