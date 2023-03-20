@@ -15,7 +15,6 @@ def create_initial_sample(
       sample_coefficient: int = 50,
       lower_bound: Union[List[float], float] = 0,
       upper_bound: Union[List[float], float] = 1,
-      is_discrete: Union[List[bool], bool] = False,
       sample_type: str = 'lhs',
       seed: Optional[int] = None) -> pd.DataFrame:
       """Sampling of the decision space.
@@ -58,17 +57,9 @@ def create_initial_sample(
       if isinstance(upper_bound, list):
             upper_bound = np.array(upper_bound)
 
-      if not isinstance(is_discrete, list) and type(is_discrete) is not np.ndarray:
-            is_discrete = np.array([is_discrete] * dim)
-      if isinstance(is_discrete, list):
-            is_discrete = np.array(is_discrete)
-
       if len(lower_bound) != dim or len(upper_bound) != dim:
             raise ValueError('Length of lower-/upper bound is not the same as the problem dimension')
       
-      if len(is_discrete) != dim:
-            raise ValueError('Length of `is_discrete` does not correspond to the problem dimension')
-
       if not (lower_bound < upper_bound).all():
             raise ValueError('Not all elements of lower bound are smaller than upper bound')
 
@@ -87,13 +78,6 @@ def create_initial_sample(
             X = np.random.rand(n, dim)
       
       X = X * (upper_bound - lower_bound) + lower_bound
-
-      # If is_discrete contains `True` values, then round the respective values to their nearest integer value
-      if is_discrete.any():
-            for i in range(dim):
-                  if is_discrete[i] == True:
-                        X[:, i] = np.rint(X[:, i])
-
       colnames = ['x' + str(x) for x in range(dim)]
       
       return pd.DataFrame(X, columns = colnames)
@@ -123,9 +107,8 @@ def _create_local_search_sample(f, dim, lower_bound, upper_bound, n_runs = 100, 
 
     return np.array(result), nfval
 
-def _levy_random_walk(x, loc = 0, scale = 10**-3, seed = None):
-      if seed is not None:
-            np.random.seed(seed)
+def _levy_random_walk(x, loc = 0, scale = 10**-3):
+      
       vec = np.random.normal(0, 1, len(x))
       norm_vec = vec/(np.sqrt((vec ** 2).sum()))
       step_size = levy.rvs(size = 1, loc = loc, scale = scale)
