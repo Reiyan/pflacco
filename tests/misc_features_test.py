@@ -1,5 +1,6 @@
 import os
 import pandas as pd
+from pandas.testing import assert_frame_equal
 import platform
 import pytest
 
@@ -36,7 +37,7 @@ def test_calculate_fitness_distance_correlation(x_samples, feature_values):
             result.append(data)
     result = pd.concat(result).reset_index(drop = True)
     colnames = result.columns[~result.columns.str.contains('costs_runtime')]
-    assert result[colnames].equals(feature_values[colnames])
+    assert (assert_frame_equal(result[colnames], feature_values[colnames]) is None)
 
 def test_calculate_hill_climbing_features(feature_values):
     result = []
@@ -50,7 +51,7 @@ def test_calculate_hill_climbing_features(feature_values):
             result.append(data)
     result = pd.concat(result).reset_index(drop = True)
     colnames = result.columns[~result.columns.str.contains('costs_runtime')]
-    assert result[colnames].equals(feature_values[colnames])
+    assert (assert_frame_equal(result[colnames], feature_values[colnames]) is None)
 
 def test_calculate_gradient_features(feature_values):
     result = []
@@ -64,7 +65,7 @@ def test_calculate_gradient_features(feature_values):
             result.append(data)
     result = pd.concat(result).reset_index(drop = True)
     colnames = result.columns[~result.columns.str.contains('costs_runtime')]
-    assert result[colnames].equals(feature_values[colnames])
+    assert (assert_frame_equal(result[colnames], feature_values[colnames]) is None)
 
 def test_calculate_length_scales_features(feature_values):
     result = []
@@ -78,7 +79,7 @@ def test_calculate_length_scales_features(feature_values):
             result.append(data)
     result = pd.concat(result).reset_index(drop = True)
     colnames = result.columns[~result.columns.str.contains('costs_runtime')]
-    assert result[colnames].equals(feature_values[colnames])
+    assert (assert_frame_equal(result[colnames], feature_values[colnames]) is None)
 
 def test_calculate_sobol_indices_features(feature_values):
     result = []
@@ -92,4 +93,4 @@ def test_calculate_sobol_indices_features(feature_values):
             result.append(data)
     result = pd.concat(result).reset_index(drop = True)
     colnames = result.columns[~result.columns.str.contains('costs_runtime')]
-    assert result[colnames].equals(feature_values[colnames])
+    assert (assert_frame_equal(result[colnames], feature_values[colnames]) is None)
