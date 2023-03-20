@@ -1,6 +1,8 @@
 import numpy as np
 import pandas as pd
+import random
 import time
+import warnings
 
 from datetime import timedelta
 from SALib.analyze import sobol
@@ -305,6 +307,7 @@ def calculate_length_scales_features(
 
       if seed is not None:
             np.random.seed(seed)
+            random.seed(seed)
 
       bounds = list(zip(lower_bound, upper_bound))
 
@@ -322,22 +325,35 @@ def calculate_length_scales_features(
       r_fval = pdist(result[:, dim].reshape(len(result), 1), metric = 'cityblock')
       r = np.divide(r_fval, r_dist, where=r_dist != 0)
       r = r[~np.isnan(r)]
-      kernel = gaussian_kde(r)
-      sample = np.random.uniform(low=r.min(), high=r.max(), size = sample_size_from_kde)
-      prob = kernel.pdf(sample)
-      h_r = entropy(prob, base = 2)
-      #moment_sample = kernel.resample(sample_size_from_kde*dim).reshape(sample_size_from_kde*dim)
-      moments = moment(r, moment = [2, 3, 4])
-      return {
-            'length_scale.shanon_entropy': h_r,
-            'length_scale.mean': np.mean(r),
-            'length_scale.std': np.std(r, ddof=1), 
-            'length_scale.distribution.second_moment': moments[0],
-            'length_scale.distribution.third_moment': moments[1],
-            'length_scale.distribution.fourth_moment': moments[2],
+
+      if np.cov(r) != np.inf or np.cov(r) != np.nan:
+        kernel = gaussian_kde(r)
+        sample = np.random.uniform(low=r.min(), high=r.max(), size = sample_size_from_kde)
+        prob = kernel.pdf(sample)
+        h_r = entropy(prob, base = 2)
+        moments = moment(r, moment = [2, 3, 4])
+        return {
+                'length_scale.shanon_entropy': h_r,
+                'length_scale.mean': np.mean(r),
+                'length_scale.std': np.std(r, ddof=1), 
+                'length_scale.distribution.second_moment': moments[0],
+                'length_scale.distribution.third_moment': moments[1],
+                'length_scale.distribution.fourth_moment': moments[2],
+                'length_scale.additional_function_eval': nfev,
+                'length_scale.costs_runtime': timedelta(seconds=time.monotonic() - start_time).total_seconds()
+        }
+      else:
+        warnings.warn('Covariance of distances ratios is either inf or nan.', RuntimeWarning, stacklevel=4)
+        return {
+            'length_scale.shanon_entropy': np.nan,
+            'length_scale.mean': np.nan,
+            'length_scale.std': np.nan, 
+            'length_scale.distribution.second_moment': np.nan,
+            'length_scale.distribution.third_moment': np.nan,
+            'length_scale.distribution.fourth_moment': np.nan,
             'length_scale.additional_function_eval': nfev,
             'length_scale.costs_runtime': timedelta(seconds=time.monotonic() - start_time).total_seconds()
-      }
+        }
 
 def calculate_sobol_indices_features(
       f: Callable[[List[float]], float],
@@ -387,7 +403,7 @@ def calculate_sobol_indices_features(
       if seed is not None:
             np.random.seed(seed)
 
-      X = create_initial_sample(dim, n = sampling_coefficient * (dim + 2), lower_bound = lower_bound, upper_bound = upper_bound, sample_type = 'sobol')
+      X = create_initial_sample(dim, n = sampling_coefficient * (dim + 2), lower_bound = lower_bound, upper_bound = upper_bound, sample_type = 'sobol', seed = seed)
       y = X.apply(lambda x: f(x.values), axis = 1).values
 
       ## A. Metrics based on Sobol Indices
