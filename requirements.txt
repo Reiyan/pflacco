@@ -4,3 +4,4 @@ pyDOE~=0.3.8
 scipy~=1.9.0
 pandas>=1.2.1,<2.*
 numdifftools~=0.9.40
+SALib~=1.4.5
