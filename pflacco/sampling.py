@@ -107,8 +107,9 @@ def _create_local_search_sample(f, dim, lower_bound, upper_bound, n_runs = 100, 
 
     return np.array(result), nfval
 
-def _levy_random_walk(x, loc = 0, scale = 10**-3):
-      
+def _levy_random_walk(x, loc = 0, scale = 10**-3, seed = None):
+      if seed is not None:
+            np.random.seed(seed)
       vec = np.random.normal(0, 1, len(x))
       norm_vec = vec/(np.sqrt((vec ** 2).sum()))
       step_size = levy.rvs(size = 1, loc = loc, scale = scale)
