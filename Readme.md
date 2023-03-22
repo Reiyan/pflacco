@@ -1,3 +1,4 @@
+![Github Status](https://github.com/reiyan/pflacco/actions/workflows/python-package.yml/badge.svg?branch=master)
 # pflacco: The R-package flacco in native Python code
 For people who are not comfortable with R.
 
@@ -22,6 +23,14 @@ The following is the description of the original flacco package:
 > In addition to the features themselves, this package also provides visualizations, e.g. of the cell mappings, barrier trees or information content
 
 The calculation procedure and further background information of ELA features is given in [Comprehensive Feature-Based Landscape Analysis of Continuous and Constrained Optimization Problems Using the R-Package flacco](https://arxiv.org/abs/1708.05258).
+
+## FAQ
+- For some (very few) features the values for the same sample differ between pflacco and flacco:
+This is a known occurence. The differences can be traced back to the underlying methods to calculate the features. For example, ```ela_meta``` relies on linear models. The method to construct a linear model in R is based on qr (quantile regression) whereas the ```LinearModel()``` in scikit-learn uses the conventional OLS method. For a large enough sample, there is no statistical difference. However, to keep this consistent between programming language this issue will be addressed in future version.
+
+- What is the difference between 0.* and 1.* version of pflacco?
+The 0.* version of pflacco provided a simple interface to the programming language R and calculated any landscape features using the R-package flacco. While this is convenient for me as a developer, the downside is that the performance of pflacco is horrendous. Hence, the >=1.* releases of pflacco offer an implementation of almost all features of the R-package flacco in native python. Thereby, the calculation of features is expedited by an order of magnitude.
+
 ## Prerequisites
 For a stable (and tested) outcome, pflacco requires at least [Python>=3.8](https://www.python.org/downloads/release/python-364/)
 
@@ -64,8 +73,83 @@ print(lon)
 
 ```
 
+It is also possible to include objective functions provided by other packages such as ```COCO``` and ```ioh```.
+
+**Note that these packages do not always pandas dataframes as input. Hence, sometimes it is necessary to transform the initial sample X to a numpy array**
+
+## COCO Example
+In order for the following code snippet to work, you have install [coco](https://github.com/numbbo/coco) first (which is **not** possible via pip/conda).
+This code snippet calculates the specified landscape features for the well-known single-objective noiseless Black-Box Optimization Benchmark (BBOB).
+The optimization problems are comprised of all 24 functions in dimensions 2 and 3 for the first five instances.
+```python
+import cocoex
+from pflacco.classical_ela_features import *
+from pflacco.sampling import create_initial_sample
+
+features = []
+# Get all 24 single-objective noiseless BBOB function in dimension 2 and 3 for the first five instances.
+suite = cocoex.Suite("bbob", f"instances:1-5", f"function_indices:1-24 dimensions:2,3")
+for problem in suite:
+    dim = problem.dimension
+    fid = problem.id_function
+    iid = problem.id_instance
+
+    # Create sample
+    X = create_initial_sample(dim, lower_bound = -5, upper_bound = 5)
+    y = X.apply(lambda x: problem(x), axis = 1)
+
+    # Calculate ELA features
+    ela_meta = calculate_ela_meta(X, y)
+    ela_distr = calculate_ela_distribution(X, y)
+    nbc = calculate_nbc(X, y)
+    disp = calculate_dispersion(X, y)
+    ic = calculate_information_content(X, y, seed = 100)
+
+    # Store results in pandas dataframe
+    data = pd.DataFrame({**ic, **ela_meta, **ela_distr, **nbc, **disp, **{'fid': fid}, **{'dim': dim}, **{'iid': iid}}, index = [0])
+    features.append(data)
+
+features = pd.concat(features).reset_index(drop = True)
+```
+
+## IOH Example
+Similar to the example above, this code snippet calculates the specified landscape features for the well-known single-objective noiseless Black-Box Optimization Benchmark (BBOB).
+The optimization problems are comprised of all 24 functions in dimensions 2 and 3 for the first five instances.
+In constrast to ```coco```, ```ioh``` can be installed via pip/conda and offers other benchmark problems. See the respective [documentation](https://iohprofiler.github.io/IOHexperimenter/python/problem.html) for more details.
+```python
+from pflacco.classical_ela_features import *
+from pflacco.sampling import create_initial_sample
+from ioh import get_problem, ProblemType
+
+features = []
+# Get all 24 single-objective noiseless BBOB function in dimension 2 and 3 for the first five instances.
+for fid in range(1,25):
+    for dim in [2, 3]:
+        for iid in range(1, 6):
+            # Get optimization problem
+            problem = get_problem(fid, iid, dim, problem_type = ProblemType.BBOB)
+
+            # Create sample
+            X = create_initial_sample(dim, lower_bound = -5, upper_bound = 5)
+            y = X.apply(lambda x: problem(x), axis = 1)
+
+            # Calculate ELA features
+            ela_meta = calculate_ela_meta(X, y)
+            ela_distr = calculate_ela_distribution(X, y)
+            ela_level = calculate_ela_level(X, y)
+            nbc = calculate_nbc(X, y)
+            disp = calculate_dispersion(X, y)
+            ic = calculate_information_content(X, y, seed = 100)
+
+            # Store results in pandas dataframe
+            data = pd.DataFrame({**ic, **ela_meta, **ela_distr, **nbc, **disp, **{'fid': fid}, **{'dim': dim}, **{'iid': iid}}, index = [0])
+            features.append(data)
+
+features = pd.concat(features).reset_index(drop = True)
+```
+
 ## Documentation
 A comprehensive documentation can be found [here](https://pflacco.readthedocs.io/en/latest/index.html).
 
 ## Contact
-I endorse and appreciate every comment and participation. Feel free to contact me under raphael.prager@uni-muenster.de
+I endorse and appreciate every comment and participation. Feel free to open an issue here on GitHub or contact me under raphael.prager@uni-muenster.de
