@@ -50,7 +50,14 @@ def _calculate_num_derivate(f, lower_bound, upper_bound, delta, eps, zero_tol, x
 def calculate_ela_meta(
       X: Union[pd.DataFrame, np.ndarray, List[List[float]]],
       y: Union[pd.Series, np.ndarray, List[float]]) -> Dict[str, Union[int, float]]:
-      """Calculation of ela_meta features, similar to the R-package `flacco`.
+      """ELA Meta features.
+      Given an initial design, linear and quadratic models of the form objective ~ features are created.
+      Both versions are created with and without simple interactions (e.g., x1:x2). Based on those models, the following features are computed:
+
+      - lin_simple.{adj_r2, intercept}: adjusted R^2 (i.e. model fit) and intercept of a simple linear model
+      - lin_simple.coef.{min, max, max_by_min}: smallest and biggest (non-intercept) absolute coefficients of the simple linear model, and their ratio
+      - {lin_w_interact, quad_simple, quad_w_interact}.adj_r2: adjusted R^2 (i.e. the model fit) of a linear model with interactions, and a quadratic model with and without interactions
+      - quad_simple.cond: condition of a simple quadratic model (without interactions), i.e. the ratio of its (absolute) biggest and smallest coefficients
 
       Parameters
       ----------
@@ -138,7 +145,10 @@ def calculate_pca(
       prop_cor_x: float = 0.9,
       prop_cov_init: float = 0.9,
       prop_cor_init: float = 0.9) -> Dict[str, Union[int, float]]:
-      """Calculation of Principal Component features, similar to the R-package `flacco`.
+      """Principal component (analysis) features.
+      
+      - expl_var.{cov, cor}_{x, init}: proportion of the explained variance when applying PCA to the covariance / correlation matrix of the decision space (x) or the entire initial design (init)
+      - expl_var_PC1.{cov, cor}_{x, init}: proportion of variance, which is explained by the first principal component when applying PCA to the covariance / correlation matrix of the decision space (x) or the entire initial design
 
       Parameters
       ----------
@@ -233,9 +243,14 @@ def calculate_nbc(
       fast_k: float = 0.05,
       dist_tie_breaker: str = 'sample',
       minimize: bool = True) -> Dict[str, Union[int, float]]:
-      """Calculation of Nearest Better Clustering features, similar to the R-package `flacco`.
+      """Nearest Better Clustering features.
+      Computes features based on the comparison of nearest neighbour and nearest better neighbour, i.e., the nearest neighbor with a better performance / objective value value.
+      
+      - nn_nb.{sd, mean}_ratio: ratio of standard deviations and arithmetic mean based on the distances among the nearest neighbours and the nearest better neighbours
+      - nn_nb.cor: correlation between distances of the nearest neighbours and the distances of the nearest better neighbours
+      - dist_ratio.coeff_var: coefficient of variation of the distance ratios
+      - nb_fitness.cor: correlation between fitness value and count of observations to whom the current observation is the nearest better neighbour (the so-called “indegree”).
 
-      Parameters
       ----------
       X : Union[pd.DataFrame, np.ndarray, List[List[float]]]
           A collection-like object which contains a sample of the decision space.
@@ -351,7 +366,10 @@ def calculate_dispersion(
       dist_method: str = 'euclidean',
       dist_p: int = 2,
       minimize: bool = True) -> Dict[str, Union[int, float]]:
-      """Calculation of Dispersion features, similar to the R-package `flacco`.
+      """Dispersion features.
+      Computes features based on the comparison of the dispersion of pairwise distances among the 'best' elements and the entire initial design:
+      
+      - {ratio, diff}_{mean, median}_{02, 05, 10, 25}: ratio and difference of the mean / median distances of the distances of the 'best' objectives vs. 'all' objectives
 
       Parameters
       ----------
@@ -429,7 +447,16 @@ def calculate_information_content(
       ic_settling_sensitivity: float = 0.05,
       ic_info_sensitivity: float = 0.5,
       seed: Optional[int] = None) -> Dict[str, Union[int, float]]:
-      """Calculation of Information Content features, similar to the R-package `flacco`.
+      """Information Content features.
+      Computes features based on the Information Content of Fitness Sequences (ICoFiS) approach [1].
+      In this approach, the information content of a continuous landscape, i.e. smoothness, ruggedness, or neutrality, are quantified.
+      While common analysis methods were able to calculate the information content of discrete landscapes, the ICoFiS approach provides an adaptation to continuous landscapes that accounts e.g. for variable step sizes in random walk sampling:
+      
+      - h_max: “maximum information content” (entropy) of the fitness sequence, cf. equation (5)
+      - eps_s: “settling sensitivity”, indicating the epsilon for which the sequence nearly consists of zeros only, cf. equation (6)
+      - eps_max: similar to eps.s, but in contrast to the former eps.max guarantees non-missing values; this simply is the epsilon-value for which H(eps.max) == h.max
+      - eps_ratio: “ratio of partial information sensitivity”, cf. equation (8), where the ratio is 0.5
+      - m0: “initial partial information”, cf. equation (7)
 
       Parameters
       ----------
@@ -597,8 +624,8 @@ def calculate_information_content(
       return {
             'ic.h_max': H.max(),
             'ic.eps_s': eps_s,
-            'ic_eps.max': np.median(epsilon[H == H.max()]),
-            'ic.eps_ration': eps05,
+            'ic.eps_max': np.median(epsilon[H == H.max()]),
+            'ic.eps_ratio': eps05,
             'ic.m0': m0[0],
             'ic.costs_runtime': timedelta(seconds=time.monotonic() - start_time).total_seconds()
       }
@@ -610,7 +637,12 @@ def calculate_ela_distribution(
       #ela_distr_modemass_threshold: float = 0.01,
       ela_distr_skewness_type: int = 3,
       ela_distr_kurtosis_type: int = 3) -> Dict[str, Union[int, float]]:
-      """Calculation of ELA Distribution features, similar to the R-package `flacco`.
+      """ELA Distribution features.
+      Calculation is based on the objective values alone.
+      
+      - skewness: skewness of the objective values
+      - kurtosis: kurtosis of the objective values
+      - number_of_peaks: number of peaks based on an estimation of the density of the objective values
 
       Parameters
       ----------
@@ -677,8 +709,8 @@ def calculate_ela_distribution(
 
       # Calculate number of peaks
       kernel = gaussian_kde(y)
-      low_ = y.min() - 3 * kernel.covariance_factor()
-      upp_ = y.max() + 3 * kernel.covariance_factor()
+      low_ = y.min() - 3 * kernel.covariance_factor() * y.std()
+      upp_ = y.max() + 3 * kernel.covariance_factor() * y.std()
       positions = np.mgrid[low_:upp_:512j]
       d = kernel(positions)
 
@@ -709,7 +741,14 @@ def calculate_limo(
       lower_bound: Union[List[float], float],
       upper_bound: Union[List[float], float],
       blocks: Optional[Union[List[int], np.ndarray, int]] = None) -> Dict[str, Optional[Union[int, float]]]:
-      """Calculation of Linear Model features, similar to the R-package `flacco`.
+      """Linear Model features.
+      Linear models are computed per cell, provided the decision space is divided into a grid of cells. Each one of the models has the form objective ~ features.
+      
+      - avg_length.{reg, norm}: length of the average coefficient vector (based on regular and normalized vectors)
+      - length_{mean, sd}: arithmetic mean and standard deviation of the lengths of all coefficient vectors
+      - cor.{reg, norm}: correlation of all coefficient vectors (based on regular and normalized vectors)
+      - ratio_{mean, sd}: arithmetic mean and standard deviation of the ratios of (absolute) maximum and minimum (non-intercept) coefficients per cell
+      - sd_{ratio, mean}.{reg, norm}: max-by-min-ratio and arithmetic mean of the standard deviations of the (non-intercept) coefficients (based on regular and normalized vectors)
 
       Parameters
       ----------
@@ -804,7 +843,13 @@ def calculate_cm_angle(
       upper_bound: Union[List[float], float],
       blocks: Optional[Union[List[int], np.ndarray, int]] = None,
       minimize: bool = True) -> Dict[str, Union[int, float]]:
-      """Calculation of Cell Mapping Angle features, similar to the R-package `flacco`.
+      """Cell Mapping Angle features.
+      These features are based on the location of the worst and best element within each cell.
+      To be precise, their distance to the cell center and the angle between these three elements (at the center) are the foundation:
+
+      - dist_ctr2{best, worst}.{mean, sd}: arithmetic mean and standard deviation of distances from the cell center to the best / worst observation within the cell (over all cells)
+      - angle.{mean, sd}: arithmetic mean and standard deviation of angles (in degree) between worst, center and best element of a cell (over all cells)
+      - y_ratio_best2worst.{mean, sd}: arithmetic mean and standard deviation of the ratios between the distance of the worst and best element within a cell and the worst and best element in the entire initial design (over all cells); note that the distances are only measured in the objective space
 
       Parameters
       ----------
@@ -899,7 +944,11 @@ def calculate_cm_conv(
       minimize: bool = True,
       cm_conv_diag: bool = False,
       cm_conv_fast_k: float = 0.05) -> Dict[str, Union[int, float]]:
-      """Calculation of Cell Mapping Convexity features, similar to the R-package `flacco`.
+      """Cell Mapping Convexity features.
+      Each cell will be represented by an observation (of the initial design), which is located closest to the cell center. Then, the objectives of three neighbouring cells are compared:
+      
+      - {convex, concave}.hard: if the objective of the inner cell is above / below the two outer cells, there is strong evidence for convexity / concavity
+      - {convex, concave}.soft: if the objective of the inner cell is above / below the arithmetic mean of the two outer cells, there is weak evidence for convexity / concavity
 
       Parameters
       ----------
@@ -1064,7 +1113,13 @@ def calculate_cm_grad(
       upper_bound: Union[List[float], float],
       blocks: Optional[Union[List[int], np.ndarray, int]] = None,
       minimize: bool = True) -> Dict[str, Union[int, float]]:
-      """Calculation of Cell Mapping Gradient Homogeneity features, similar to the R-package `flacco`.
+      """Cell Mapping Gradient Homogeneity features.
+      Within a cell of the initial grid, the gradients between each observation and its nearest neighbour observation are computed.
+      Those gradients are then directed towards the smaller of the two objective values and afterwards normalized.
+      Then, the length of the sum of all the directed and normalized gradients within a cell is computed.
+      Based on those measurements (one per cell) the following features are computed:
+
+      - {mean, sd}: arithmetic mean and standard deviation of the aforementioned lengths
 
       Parameters
       ----------
@@ -1135,7 +1190,13 @@ def calculate_ela_conv(
       ela_conv_nsample: int = 1000,
       ela_conv_threshold: float = 1e-10,
       seed: Optional[int] = None) -> Dict[str, Union[int, float]]:
-      """Calculation of ELA Convexity features, similar to the R-package `flacco`.
+      """ELA Convexity features.
+      Two observations are chosen randomly from the initial design. Then, a linear (convex) combination of those observations is calculated based on a random weight from [0, 1].
+      The corresponding objective value will be compared to the linear combination of the objectives from the two original observations.
+      This process is replicated convex.nsample (per default 1000) times and will then be aggregated:
+
+      - {convex_p, linear_p}: percentage of convexity / linearity
+      - linear_dev.{orig, abs}: average (original / absolute) deviation between the linear combination of the objectives and the objective of the linear combination of the observations
 
       Parameters
       ----------
@@ -1193,7 +1254,10 @@ def calculate_ela_level(
       ela_level_quantiles: List[float] = [0.1, 0.25, 0.5],
       interface_mda_from_R: bool = False,
       ela_level_resample_iterations: int = 10) -> Dict[str, Union[int, float]]:
-      """Calculation of ELA Levelset features, similar to the R-package `flacco`.
+      """ELA Levelset features.
+
+      - mmce_{methods}_{quantiles}: mean misclassification error of each pair of classification method and quantile
+      - {method1}_{method2}_{quantiles}: ratio of all pairs of classification methods for all quantiles
 
       Parameters
       ----------
@@ -1300,7 +1364,14 @@ def calculate_ela_curvate(
       eps: float = 10**-4,
       zero_tol: float = np.sqrt(np.nextafter(0, 1)/70**-7),
       seed: Optional[int] = None) -> Dict[str, Union[int, float]]:
-      """Calculation of ELA Curvature features, similar to the R-package `flacco`.
+      """ELA Curvature features.
+
+      Given a feature object, curv.sample_size samples (per default 100 * d with d being the number of features) are randomly chosen.
+      Then, the gradient and hessian of the function are estimated based on those points and the following features are computed:
+
+      - grad_norm.{min, lq, mean, median, uq, max, sd, nas}: aggregations (minimum, lower quartile, arithmetic mean, median, upper quartile, maximum, standard deviation and percentage of NAs) of the gradients' lengths
+      - grad_scale.{min, lq, mean, median, uq, max, sd, nas}: aggregations of the ratios between biggest and smallest (absolute) gradient directions
+      - hessian_cond.{min, lq, mean, median, uq, max, sd, nas}: aggregations of the ratios of biggest and smallest eigenvalue of the hessian matrices
 
       Parameters
       ----------
@@ -1402,7 +1473,16 @@ def calculate_ela_local(
       ela_local_clust_method: str = 'single',
       seed: Optional[int] = None,
       **minimizer_kwargs) -> Dict[str, Union[int, float]]:
-      """Calculation of ELA Local Search features, similar to the R-package `flacco`.
+      """ELA Local Search features.
+      Based on some randomly chosen points from the initial design, a pre-defined number of local searches (ela_local.local_searches) are executed.
+      Their optima are then clustered (using hierarchical clustering), assuming that local optima that are located close to each other, likely belong to the same basin.
+      Given those basins, the following features are computed:
+
+      - n_loc_opt.{abs, rel}: the absolute / relative amount of local optima
+      - best2mean_contr.orig: each cluster is represented by its center; this feature is the ratio of the objective values of the best and average cluster
+      - best2mean_contr.ratio: each cluster is represented by its center; this feature is the ratio of the differences in the objective values of average to best and worst to best cluster
+      - basin_sizes.avg_{best, non_best, worst}: average basin size of the best / non-best / worst cluster(s)
+      - fun_evals.{min, lq, mean, median, uq, max, sd}: aggregations of the performed local searches
 
       Parameters
       ----------

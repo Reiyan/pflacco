@@ -25,6 +25,10 @@ def calculate_hill_climbing_features(
       seed: Optional[int] = None,
       minkowski_p: int = 2) -> Dict[str, Union[int, float]]:
       """Calculation of a Hill Climbing features in accordance to [1].
+      The feature set is calculated on a number of hill climbing runs.
+      
+      - {avg, std}_dist_between_opt: average and standard deviation of distance between found optima
+      - {avg, std}_dist_local_to_global: average and standard deviation of distance between best found optima and all other local optima
 
       Parameters
       ----------
@@ -96,6 +100,10 @@ def calculate_gradient_features(
       budget_factor_per_dim: int = 100,
       seed: Optional[int] = None) -> Dict[str, Union[int, float]]:
       """Calculation of a Gradient features in accordance to [1].
+      A random walk is performed the gradient of the fitness space between each consecutive step is estimated.
+
+      - g_avg: the average estimated gradients
+      - g_std: the standard deviation of estimated gradients
 
       Parameters
       ----------
@@ -182,6 +190,10 @@ def calculate_fitness_distance_correlation(
       minimize: bool = True,
       minkowski_p: int = 2) -> Dict[str, Union[int, float]]:
       """Calculation of Fitness Distance Correlation features in accordance to [1] and [2].
+      
+      - fd_{correlation, cov}: Correlation/Covariance between the fitness values f_i and the respective distance d_i, where d_i is the distance in the decision space between the given observation x_i and the sampled x*
+      - distance_{mean, std}: Mean and standard deviation of all distances
+      - fitness_{mean, std}: Mean and standard deviation of all fitness values
 
       Parameters
       ----------
@@ -270,6 +282,10 @@ def calculate_length_scales_features(
       minimize: bool = True,
       sample_size_from_kde: int = 500) -> Dict[str, Union[int, float]]:
       """Calculation of Length-Scale features in accordance to [1].
+      
+      - shanon_entropy: Entropy measure of the distribution of distances within the objective spaces divided by distances in the decision space of a given sample
+      - {mean, std}: Mean and standard deviation of said distribution
+      - distribution.{second, third, fourth}_moment: Respective moments of the said distribution
 
       Parameters
       ----------
@@ -365,6 +381,14 @@ def calculate_sobol_indices_features(
       min_obs_per_bin_factor: float = 1.5,
       seed: Optional[int] = None) -> Dict[str, Union[int, float]]:
       """Calculation of Sobol Indices, Fitness- and State-Distribution features.
+      These features consists of Sobol method as well as extracting distribution moments of raw samples as well as histogram structures.
+
+      - sobol_indices.degree_of_variable_interaction: Describes the degree of variable interaction
+      - sobol_indices.coeff_var_x_sensitivy: Describes how sensitive the objective function reacts to changes in the decision space
+      - fitness_variance: Variance of the objective values
+      - state_variance: Variance of the averaged distances within a histogram bin
+      - fitness_skewness: Skewness of the normalized objective values
+      - state_skewness: Skewness of the averaged distances within a histogram bin
 
       Parameters
       ----------
