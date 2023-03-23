@@ -15,8 +15,8 @@ sys.path.insert(0, package_path)
 project = 'pflacco'
 copyright = '2022, Raphael Patrick Prager'
 author = 'Raphael Patrick Prager'
-version = '1.1'
-release = '1.1.2'
+version = '1.2'
+release = '1.2.0'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
