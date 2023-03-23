@@ -31,6 +31,10 @@ This is a known occurence. The differences can be traced back to the underlying 
 - What is the difference between 0.* and 1.* version of pflacco?
 The 0.* version of pflacco provided a simple interface to the programming language R and calculated any landscape features using the R-package flacco. While this is convenient for me as a developer, the downside is that the performance of pflacco is horrendous. Hence, the >=1.* releases of pflacco offer an implementation of almost all features of the R-package flacco in native python. Thereby, the calculation of features is expedited by an order of magnitude.
 
+- Is it possible to calculate landscape features for CEC or Nevergrad?
+Generally speaking, this is definitely possible. However, to the best of my knowledge, Nevergrad does not offer a dedicated API to query single objective functions and the CEC benchmarks are mostly written in C or Matlab.
+Some CEC benchmarks have an unofficial Python wrapper (which is not kept up to date) like [CEC2017](https://github.com/lacerdamarcelo/cec17_python). These require additional compiling steps to run any of the functions.
+
 ## Prerequisites
 For a stable (and tested) outcome, pflacco requires at least [Python>=3.8](https://www.python.org/downloads/release/python-364/)
 
