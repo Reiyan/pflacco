@@ -6,7 +6,7 @@ Note that only Python >= 3.8 is supported for now!
 
 For Windows:
 
-.. code-block:: console
+.. code-block:: bash
 
    python -m venv venv
 
@@ -16,7 +16,7 @@ For Windows:
 
 For Mac/Linux:
 
-.. code-block:: console
+.. code-block:: bash
 
    python3 -m venv venv
 

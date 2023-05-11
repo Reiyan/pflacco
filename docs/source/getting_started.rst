@@ -47,7 +47,7 @@ It is also possible to include objective functions provided by other packages su
 **Note that these packages do not always pandas dataframes as input. Hence, sometimes it is necessary to transform the initial sample X to a numpy array**
 
 COCO Example
-===============
+------------
 In order for the following code snippet to work, you have install `coco <https://github.com/numbbo/coco>`_ first (which is **not** possible via pip/conda).
 This code snippet calculates the specified landscape features for the well-known single-objective noiseless Black-Box Optimization Benchmark (BBOB).
 The optimization problems are comprised of all 24 functions in dimensions 2 and 3 for the first five instances.
@@ -85,7 +85,7 @@ The optimization problems are comprised of all 24 functions in dimensions 2 and 
 
 
 IOH Example
-===============
+-----------
 Similar to the example above, this code snippet calculates the specified landscape features for the well-known single-objective noiseless Black-Box Optimization Benchmark (BBOB).
 The optimization problems are comprised of all 24 functions in dimensions 2 and 3 for the first five instances.
 In constrast to ``coco``, ``ioh`` can be installed via pip/conda and offers other benchmark problems. See the respective `documentation <https://iohprofiler.github.io/IOHexperimenter/python/problem.html>`_ for more details.

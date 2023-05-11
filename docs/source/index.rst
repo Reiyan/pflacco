@@ -54,6 +54,7 @@ Contents
 .. toctree::
 
    installation
+   feature_sets
    getting_started
    api
 
