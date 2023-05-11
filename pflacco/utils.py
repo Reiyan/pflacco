@@ -1,6 +1,7 @@
 import itertools
 import numpy as np
 import pandas as pd
+import warnings
 
 #from rpy2.robjects.packages import importr, isinstalled
 
@@ -64,22 +65,36 @@ def _determine_max_n_blocks(X):
             blocks += 1
       return blocks
 
-def _check_blocks_variable(X, dim, blocks):
+def _check_blocks_variable(X, dim, blocks, force = False):
       if blocks is None:
             blocks = max(_determine_max_n_blocks(X), 2)
+      else:
+            n_bl = _determine_max_n_blocks(X)
+            if isinstance(blocks, int):
+                  if blocks > n_bl:
+                        if force == False:
+                              raise ValueError('The provided value for "block" is too large, resulting in less than 3 observations per cell.')
+                        else:
+                              warnings.warn(f'For the given dataframe X, the recommended maximum number of blocks per dim is {n_bl}. The current value for blocks ({blocks}) exceeds that.')
+            else:
+                  if (np.array(blocks) > n_bl).any():
+                        if force == False:
+                              raise ValueError('The provided value for "block" is too large, resulting in less than 3 observations per cell.')
+                        else:
+                              warnings.warn(f'For the given dataframe X, the recommended maximum number of blocks per dim is {n_bl}. The current value for blocks ({blocks}) exceeds that.')
+                  
       if not isinstance(blocks, list) and type(blocks) is not np.ndarray:
             blocks = np.array([blocks] * dim)
       elif isinstance(blocks, list):
             blocks = np.array(blocks)
       if len(blocks) != dim:
             raise Exception('The provided value for "block" does not have the same length as the dimensionality of X.')
-
+      
       return blocks
 
 def _create_blocks(X, y, lower_bound, upper_bound, blocks = None):
       X, y, _validate_variable_types(X, y)
       dim = X.shape[1]
-      blocks = _check_blocks_variable(X, dim, blocks)
       lower_bound, upper_bound = _transform_bounds_to_canonical(dim, lower_bound, upper_bound)
 
       block_widths = (upper_bound - lower_bound)/blocks

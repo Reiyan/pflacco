@@ -740,7 +740,8 @@ def calculate_limo(
       y: Union[pd.Series, np.ndarray, List[float]],
       lower_bound: Union[List[float], float],
       upper_bound: Union[List[float], float],
-      blocks: Optional[Union[List[int], np.ndarray, int]] = None) -> Dict[str, Optional[Union[int, float]]]:
+      blocks: Optional[Union[List[int], np.ndarray, int]] = None,
+      force: bool = False) -> Dict[str, Optional[Union[int, float]]]:
       """Linear Model features.
       Linear models are computed per cell, provided the decision space is divided into a grid of cells. Each one of the models has the form objective ~ features.
       
@@ -763,6 +764,11 @@ def calculate_limo(
           Upper bound of variables of the decision space.
       blocks : Optional[Union[List[int], np.ndarray, int]], optional
           Number of blocks per dimension, by default None.
+      force : bool, optional
+          The recommended number of blocks per dim is >2 and the minimum number of observation per cell is 3.
+          Meaning, that X has to have at least dim^blocks * 3 observations. This requirement can be circumenvented
+          by setting `force` to True. 
+          ATTENTION: The resulting feature values are not in line with any recommendation and may not have any predictive power, by default False.
 
       Returns
       -------
@@ -772,8 +778,11 @@ def calculate_limo(
       start_time = time.monotonic()
       X, y = _validate_variable_types(X, y)
       dims = X.shape[1]
-      blocks = _check_blocks_variable(X, dims, blocks)
+      blocks = _check_blocks_variable(X, dims, blocks, force = force)
 
+      if blocks.min() <= 2 and force == False:
+            raise ValueError('The cell convexity features can only be computed when all dimensions have more than 2 cells.')
+      
       # Consolidate X, y, and cells into one data frame
       init = X.copy()
       init['y'] = y
@@ -842,6 +851,7 @@ def calculate_cm_angle(
       lower_bound: Union[List[float], float],
       upper_bound: Union[List[float], float],
       blocks: Optional[Union[List[int], np.ndarray, int]] = None,
+      force: bool = False,
       minimize: bool = True) -> Dict[str, Union[int, float]]:
       """Cell Mapping Angle features.
       These features are based on the location of the worst and best element within each cell.
@@ -864,6 +874,11 @@ def calculate_cm_angle(
           Upper bound of variables of the decision space.
       blocks : Optional[Union[List[int], np.ndarray, int]], optional
           Number of blocks per dimension, by default None.
+      force : bool, optional
+          The recommended number of blocks per dim is >2 and the minimum number of observation per cell is 3.
+          Meaning, that X has to have at least dim^blocks * 3 observations. This requirement can be circumenvented
+          by setting `force` to True. 
+          ATTENTION: The resulting feature values are not in line with any recommendation and may not have any predictive power, by default False.
       minimize : bool, optional
           Indicator whether the objective function should be minimized or maximized, by default True.
 
@@ -876,15 +891,11 @@ def calculate_cm_angle(
       start_time = time.monotonic()
       X, y = _validate_variable_types(X, y)
       dim = X.shape[1]
-      if blocks is None:
-            blocks = _determine_max_n_blocks(X)
-      if not isinstance(blocks, list) and type(blocks) is not np.ndarray:
-            blocks = np.array([blocks] * dim)
-      elif isinstance(blocks, list):
-            blocks = np.array(blocks)
-      if len(blocks) != dim:
-            raise ValueError('The provided value for "block" does not have the same length as the dimensionality of X.')
-
+      
+      blocks = _check_blocks_variable(X, dim, blocks, force = force)
+      if blocks.min() <= 2 and force == False:
+            raise ValueError('The cell convexity features can only be computed when all dimensions have more than 2 cells.')
+      
       init = X.copy()
       init['y'] = y if minimize == True else -1 * y
       init['cell'], cell_centers = _create_blocks(X, y, lower_bound, upper_bound, blocks)
@@ -941,6 +952,7 @@ def calculate_cm_conv(
       lower_bound: Union[List[float], float],
       upper_bound: Union[List[float], float],
       blocks: Optional[Union[List[int], np.ndarray, int]] = None,
+      force: bool = False,
       minimize: bool = True,
       cm_conv_diag: bool = False,
       cm_conv_fast_k: float = 0.05) -> Dict[str, Union[int, float]]:
@@ -963,6 +975,11 @@ def calculate_cm_conv(
           Upper bound of variables of the decision space.
       blocks : Optional[Union[List[int], np.ndarray, int]], optional
           Number of blocks per dimension, by default None.
+      force : bool, optional
+          The recommended number of blocks per dim is >2 and the minimum number of observation per cell is 3.
+          Meaning, that X has to have at least dim^blocks * 3 observations. This requirement can be circumenvented
+          by setting `force` to True. 
+          ATTENTION: The resulting feature values are not in line with any recommendation and may not have any predictive power, by default False.
       minimize : bool, optional
           Indicator whether the objective function should be minimized or maximized, by default True.
       cm_conv_diag : bool, optional
@@ -979,8 +996,8 @@ def calculate_cm_conv(
       start_time = time.monotonic()
       X, y = _validate_variable_types(X, y)
       dim = X.shape[1]
-      blocks = _check_blocks_variable(X, dim, blocks)
-      if blocks.min() <= 2:
+      blocks = _check_blocks_variable(X, dim, blocks, force = force)
+      if blocks.min() <= 2 and force == False:
             raise ValueError('The cell convexity features can only be computed when all dimensions have more than 2 cells.')
       if cm_conv_fast_k < 0 or cm_conv_fast_k > X.shape[0]:
             raise ValueError('cm_conv_fast_k must be in the interval [0, n] where n is the number of observations in X.')
@@ -1112,6 +1129,7 @@ def calculate_cm_grad(
       lower_bound: Union[List[float], float],
       upper_bound: Union[List[float], float],
       blocks: Optional[Union[List[int], np.ndarray, int]] = None,
+      force: bool = False,
       minimize: bool = True) -> Dict[str, Union[int, float]]:
       """Cell Mapping Gradient Homogeneity features.
       Within a cell of the initial grid, the gradients between each observation and its nearest neighbour observation are computed.
@@ -1134,6 +1152,11 @@ def calculate_cm_grad(
           Upper bound of variables of the decision space.
       blocks : Optional[Union[List[int], np.ndarray, int]], optional
           Number of blocks per dimension, by default None.
+      force : bool, optional
+          The recommended number of blocks per dim is >2 and the minimum number of observation per cell is 3.
+          Meaning, that X has to have at least dim^blocks * 3 observations. This requirement can be circumenvented
+          by setting `force` to True. 
+          ATTENTION: The resulting feature values are not in line with any recommendation and may not have any predictive power, by default False.
       minimize : bool, optional
           Indicator whether the objective function should be minimized or maximized, by default True.
 
@@ -1146,9 +1169,9 @@ def calculate_cm_grad(
       start_time = time.monotonic()
       X, y = _validate_variable_types(X, y)
       dim = X.shape[1]
-      blocks = _check_blocks_variable(X, dim, blocks)
+      blocks = _check_blocks_variable(X, dim, blocks, force = force)
 
-      if blocks.min() <= 2:
+      if blocks.min() <= 2 and force == False:
             raise ValueError('The cell grad features can only be computed when all dimensions have more than 2 cells.')
 
       init = X.copy()
