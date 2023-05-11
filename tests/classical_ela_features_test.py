@@ -24,6 +24,11 @@ def feature_values():
     X = pd.read_pickle(os.path.join(RSC, 'test_classical_ela_features.pkl'))
     return X
 
+@pytest.fixture
+def cm_feature_values():
+    X = pd.read_pickle(os.path.join(RSC, 'test_cm_ela_features.pkl'))
+    return X
+
 ########################################################
 # Deterministic Features
 def test_calculate_ela_meta(x_samples, feature_values):
@@ -191,19 +196,111 @@ def test_calculate_information_content(x_samples, feature_values):
 
 ########################################################
 ## Cell Mapping Features
-@pytest.mark.skip(reason='To be implemented')
-def test_calculate_cell_mapping(feature_values):
+@pytest.mark.skip(reason='No Linux Resources available yet')
+def test_calculate_cm_angle(x_samples, cm_feature_values):
     result = []
     for fid in range(1,25):
-        for dim in DIMS:
-            X = create_initial_sample(dim, n = 3 ** dim)
+        for dim in [2, 3, 5]:
+            force = False
+            if dim == 5:
+                force = True
+            tmp = x_samples.iloc[:(dim*50), :dim]
             f = get_problem(fid, 1, dim)
-            y = X.apply(lambda x: f(x), axis = 1)
-            features = calculate_information_content(X, y, seed = 100)
+            y = tmp.apply(lambda x: f(x), axis = 1)
+            features = calculate_cm_angle(tmp, y, lower_bound = -5, upper_bound = 5, blocks = 3, force = force)
             data = pd.DataFrame(features, index = [0])
             data['fid'] = fid
             data['dim'] = dim
             result.append(data)
     result = pd.concat(result).reset_index(drop = True)
     colnames = result.columns[~result.columns.str.contains('costs_runtime')]
-    assert result[colnames].equals(feature_values[colnames])
+    assert (assert_frame_equal(result[colnames], cm_feature_values[colnames]) is None)
+
+@pytest.mark.skip(reason='No Linux Resources available yet')
+def test_calculate_cm_conv(x_samples, cm_feature_values):
+    result = []
+    for fid in range(1,25):
+        for dim in [2, 3, 5]:
+            force = False
+            if dim == 5:
+                force = True
+            tmp = x_samples.iloc[:(dim*50), :dim]
+            f = get_problem(fid, 1, dim)
+            y = tmp.apply(lambda x: f(x), axis = 1)
+            features = calculate_cm_conv(tmp, y, lower_bound = -5, upper_bound = 5, blocks = 3, force = force)
+            data = pd.DataFrame(features, index = [0])
+            data['fid'] = fid
+            data['dim'] = dim
+            result.append(data)
+    result = pd.concat(result).reset_index(drop = True)
+    colnames = result.columns[~result.columns.str.contains('costs_runtime')]
+    assert (assert_frame_equal(result[colnames], cm_feature_values[colnames]) is None)
+
+@pytest.mark.skip(reason='No Linux Resources available yet')
+def test_calculate_cm_grad(x_samples, cm_feature_values):
+    result = []
+    for fid in range(1,25):
+        for dim in [2, 3, 5]:
+            force = False
+            if dim == 5:
+                force = True
+            tmp = x_samples.iloc[:(dim*50), :dim]
+            f = get_problem(fid, 1, dim)
+            y = tmp.apply(lambda x: f(x), axis = 1)
+            features = calculate_cm_grad(tmp, y, lower_bound = -5, upper_bound = 5, blocks = 3, force = force)
+            data = pd.DataFrame(features, index = [0])
+            data['fid'] = fid
+            data['dim'] = dim
+            result.append(data)
+    result = pd.concat(result).reset_index(drop = True)
+    colnames = result.columns[~result.columns.str.contains('costs_runtime')]
+    assert (assert_frame_equal(result[colnames], cm_feature_values[colnames]) is None)
+
+@pytest.mark.skip(reason='No Linux Resources available yet')
+def test_calculate_limo(x_samples, cm_feature_values):
+    result = []
+    for fid in range(1,25):
+        for dim in [2, 3, 5]:
+            force = False
+            if dim == 5:
+                force = True
+            tmp = x_samples.iloc[:(dim*50), :dim]
+            f = get_problem(fid, 1, dim)
+            y = tmp.apply(lambda x: f(x), axis = 1)
+            features = calculate_limo(tmp, y, lower_bound = -5, upper_bound = 5, blocks = 3, force = force)
+            data = pd.DataFrame(features, index = [0])
+            data['fid'] = fid
+            data['dim'] = dim
+            result.append(data)
+    result = pd.concat(result).reset_index(drop = True)
+    colnames = result.columns[~result.columns.str.contains('costs_runtime')]
+    assert (assert_frame_equal(result[colnames], cm_feature_values[colnames]) is None)
+
+@pytest.mark.skip(reason='No Linux Resources available yet')
+def test_block_value_prerequisite(x_samples):
+    with pytest.raises(ValueError, match='The provided value for "block" is too large, resulting in less than 3 observations per cell.'):
+        fid = 1
+        dim = 10
+        tmp = x_samples.iloc[:(dim*50), :dim]
+        f = get_problem(fid, 1, dim)
+        y = tmp.apply(lambda x: f(x), axis = 1)
+        calculate_limo(tmp, y, lower_bound = -5, upper_bound = 5, blocks = 3)
+
+@pytest.mark.skip(reason='No Linux Resources available yet')
+def test_block_value_too_low(x_samples):
+    with pytest.raises(ValueError, match='The cell convexity features can only be computed when all dimensions have more than 2 cells.'):
+        fid = 1
+        dim = 10
+        tmp = x_samples.iloc[:(dim*50), :dim]
+        f = get_problem(fid, 1, dim)
+        y = tmp.apply(lambda x: f(x), axis = 1)
+        calculate_cm_angle(tmp, y, lower_bound = -5, upper_bound = 5, blocks = 2)
+
+def test_block_value_forced(x_samples):
+    with pytest.warns(UserWarning, match=r'For the given dataframe X, the recommended maximum number of blocks per dim is \d+. The current value for blocks \(\d+\) exceeds that.'):
+        fid = 1
+        dim = 3
+        tmp = x_samples.iloc[:(dim*50), :dim]
+        f = get_problem(fid, 1, dim)
+        y = tmp.apply(lambda x: f(x), axis = 1)
+        calculate_cm_conv(tmp, y, lower_bound = -5, upper_bound = 5, blocks = 5, force = True)

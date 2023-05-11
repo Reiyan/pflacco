@@ -1,3 +1,6 @@
+import sys
+sys.path.append("../pflacco")
+
 from pflacco.classical_ela_features import *
 from pflacco.misc_features import *
 from pflacco.sampling import * 
@@ -131,15 +134,18 @@ def ls_investigation():
 def gen_cell_features():
     result = []
     for fid in range(1,25):
-        for dim in DIMS:
-            #X = create_initial_sample(dim, n = (dim ** 3) * 3, seed = 100)
-            X = x_samples
+        for dim in [2, 3, 5]:
+            force = False
+            n = dim * 50
+            if dim == 5:
+                force = True
+            tmp = x_samples.iloc[:n, :dim]
             f = get_problem(fid, 1, dim, ProblemType.BBOB)
-            y = X.apply(lambda x: f(x), axis = 1)
-            cm_angle = calculate_cm_angle(X, y, lower_bound = -5, upper_bound = 5, blocks = 3)
-            cm_conv = calculate_cm_conv(X, y, lower_bound = -5, upper_bound = 5, blocks = 3)
-            cm_grad = calculate_cm_grad(X, y, lower_bound = -5, upper_bound = 5, blocks = 3)
-            limo = calculate_limo(X, y, lower_bound = -5, upper_bound = 5, blocks = 3)
+            y = tmp.apply(lambda x: f(x), axis = 1)
+            cm_angle = calculate_cm_angle(tmp, y, lower_bound = -5, upper_bound = 5, blocks = 3, force = force)
+            cm_conv = calculate_cm_conv(tmp, y, lower_bound = -5, upper_bound = 5, blocks = 3, force = force)
+            cm_grad = calculate_cm_grad(tmp, y, lower_bound = -5, upper_bound = 5, blocks = 3, force = force)
+            limo = calculate_limo(tmp, y, lower_bound = -5, upper_bound = 5, blocks = 3, force = force)
 
             data = pd.DataFrame({**cm_angle, **cm_conv, **cm_grad, **limo, **{'fid':fid}, **{'dim':dim}}, index = [0])
             result.append(data)
@@ -155,7 +161,7 @@ def gen_cell_features():
 
 #gen_classical_features()
 #gen_sample()
-#gen_cell_features()
+gen_cell_features()
 #gen_misc_features()
 #ls_investigation()
 #gen_lon_features()
