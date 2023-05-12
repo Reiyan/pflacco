@@ -1,7 +1,7 @@
 name: Generate Linux test resources
 
 on:
-  workflow_dispatch
+  workflow_dispatch:
 
 jobs:
   build:
