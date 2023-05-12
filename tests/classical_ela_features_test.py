@@ -196,7 +196,6 @@ def test_calculate_information_content(x_samples, feature_values):
 
 ########################################################
 ## Cell Mapping Features
-@pytest.mark.skip(reason='No Linux Resources available yet')
 def test_calculate_cm_angle(x_samples, cm_feature_values):
     result = []
     for fid in range(1,25):
@@ -216,7 +215,6 @@ def test_calculate_cm_angle(x_samples, cm_feature_values):
     colnames = result.columns[~result.columns.str.contains('costs_runtime')]
     assert (assert_frame_equal(result[colnames], cm_feature_values[colnames]) is None)
 
-@pytest.mark.skip(reason='No Linux Resources available yet')
 def test_calculate_cm_conv(x_samples, cm_feature_values):
     result = []
     for fid in range(1,25):
@@ -236,7 +234,6 @@ def test_calculate_cm_conv(x_samples, cm_feature_values):
     colnames = result.columns[~result.columns.str.contains('costs_runtime')]
     assert (assert_frame_equal(result[colnames], cm_feature_values[colnames]) is None)
 
-@pytest.mark.skip(reason='No Linux Resources available yet')
 def test_calculate_cm_grad(x_samples, cm_feature_values):
     result = []
     for fid in range(1,25):
@@ -256,7 +253,6 @@ def test_calculate_cm_grad(x_samples, cm_feature_values):
     colnames = result.columns[~result.columns.str.contains('costs_runtime')]
     assert (assert_frame_equal(result[colnames], cm_feature_values[colnames]) is None)
 
-@pytest.mark.skip(reason='No Linux Resources available yet')
 def test_calculate_limo(x_samples, cm_feature_values):
     result = []
     for fid in range(1,25):
@@ -276,7 +272,6 @@ def test_calculate_limo(x_samples, cm_feature_values):
     colnames = result.columns[~result.columns.str.contains('costs_runtime')]
     assert (assert_frame_equal(result[colnames], cm_feature_values[colnames]) is None)
 
-@pytest.mark.skip(reason='No Linux Resources available yet')
 def test_block_value_prerequisite(x_samples):
     with pytest.raises(ValueError, match='The provided value for "block" is too large, resulting in less than 3 observations per cell.'):
         fid = 1
@@ -286,7 +281,6 @@ def test_block_value_prerequisite(x_samples):
         y = tmp.apply(lambda x: f(x), axis = 1)
         calculate_limo(tmp, y, lower_bound = -5, upper_bound = 5, blocks = 3)
 
-@pytest.mark.skip(reason='No Linux Resources available yet')
 def test_block_value_too_low(x_samples):
     with pytest.raises(ValueError, match='The cell convexity features can only be computed when all dimensions have more than 2 cells.'):
         fid = 1

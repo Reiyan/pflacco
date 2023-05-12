@@ -111,8 +111,6 @@ def lon_investigation():
     result = pd.concat(result).reset_index(drop=True)
     result = result[result.columns[~result.columns.str.contains('costs_runtime')]]
     result = result.sort_values(by = ['fid', 'dim']).reset_index(drop = True)
-    print('test')
-
 
 def ls_investigation():
     result = []
@@ -127,9 +125,7 @@ def ls_investigation():
         result.append(data)
 
     result = pd.concat(result).reset_index(drop=True)
-    print('test')
 
-    
 
 def gen_cell_features():
     result = []
