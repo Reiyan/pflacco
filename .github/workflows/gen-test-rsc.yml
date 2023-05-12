@@ -1,10 +1,7 @@
 name: Generate Linux test resources
 
 on:
-  push:
-    branches:
-      - dev
-  workflow_dispatch:
+  workflow_dispatch
 
 jobs:
   build:
@@ -24,7 +21,7 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         python -m pip install -r requirements.txt -r requirements_test.txt
-        python generate_resources.py
+        python tests/generate_resources.py
     - name: Generate Test Data
       uses: actions/upload-artifact@v3
       with:
