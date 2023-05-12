@@ -1,6 +1,10 @@
 name: Generate Linux test resources
 
 on:
+  push:
+    branches:
+      - master
+      - dev
   workflow_dispatch
 
 jobs:
