@@ -12,6 +12,7 @@ from sklearn.decomposition import PCA
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis, QuadraticDiscriminantAnalysis
 from sklearn.neighbors import NearestNeighbors 
 from sklearn.model_selection import StratifiedKFold
+from sklearn.preprocessing import PolynomialFeatures
 
 from scipy.spatial.distance import pdist, squareform
 from scipy.stats import gaussian_kde, pearsonr
@@ -86,20 +87,14 @@ def calculate_ela_meta(
       lin_simple_coef_max_by_min = lin_simple_coef_max / lin_simple_coef_min
       lin_simple_adj_r2 = 1 - (1 - model.score(X, y)) * (len(y) - 1) / (len(y) - X.shape[1]-1)
       
-
       # Create linear model with interaction
       # Create pairwise interactions
-      X_interact = X.copy()
-      for idx in range(len(X.columns)):
-            tmp_idx = idx + 1
-            while tmp_idx < len(X.columns):         
-                  X_interact[X.columns[idx] + X.columns[tmp_idx]] = X[X.columns[idx]] * X[X.columns[tmp_idx]]
-                  tmp_idx += 1
-
+      poly = PolynomialFeatures(interaction_only=True, include_bias=False)
+      X_interact = poly.fit_transform(X)
+ 
       model = linear_model.LinearRegression()
       model.fit(X_interact, y)
       lin_w_interact_adj_r2 = 1 - (1 - model.score(X_interact, y)) * (len(y) - 1) / (len(y) - X_interact.shape[1] - 1)
-
 
       # Create quadratic model and calculate qm features
       model = linear_model.LinearRegression()
