@@ -155,10 +155,10 @@ def gen_cell_features():
 
 
 
-#gen_classical_features()
-#gen_sample()
+gen_classical_features()
+gen_sample()
 gen_cell_features()
-#gen_misc_features()
+gen_misc_features()
 #ls_investigation()
 #gen_lon_features()
 #lon_investigation()
