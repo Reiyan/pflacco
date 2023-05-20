@@ -107,13 +107,13 @@ def calculate_ela_meta(
       quad_model_con_max = np.abs(model.coef_[int(X_squared.shape[1]/2):]).max()
       quad_simple_cond = quad_model_con_max/quad_model_con_min
 
-      # Create linear model with interaction
+      # Create quadratic model with interaction
       # Create pairwise interactions
-      X_interact = X_squared.copy()
+      X_interact = X_squared.to_numpy()
       for idx in range(len(X_squared.columns)):
             tmp_idx = idx + 1
-            while tmp_idx < len(X_squared.columns):         
-                  X_interact[X_squared.columns[idx] + X_squared.columns[tmp_idx]] = X_squared[X_squared.columns[idx]] * X_squared[X_squared.columns[tmp_idx]]
+            while tmp_idx < len(X_squared.columns):
+                  X_interact = np.hstack((X_interact, (X_interact[:, idx] * X_interact[:, tmp_idx]).reshape(-1, 1)))
                   tmp_idx += 1
 
       model = linear_model.LinearRegression()
@@ -321,6 +321,9 @@ def calculate_nbc(
                                     i = i[-1]
                               else:
                                     raise ValueError('Possible tie breaker methods are "sample", "first", and "last"')
+
+                        # Transform array of length 1 to a single scalar
+                        i = i[0]
 
                         results.append([idx, ind_alt[i], d[i]])
 
