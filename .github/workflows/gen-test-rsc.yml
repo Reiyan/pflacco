@@ -20,7 +20,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        python -m pip install -r requirements.txt
+        python -m pip install -r requirements.txt -r requirements_test.txt
         python tests/generate_resources.py
     - name: Generate Test Data
       uses: actions/upload-artifact@v3
