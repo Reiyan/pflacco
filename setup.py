@@ -7,7 +7,7 @@ with open('requirements.txt') as f:
 
 setuptools.setup(
      name='pflacco',  
-     version='1.2.0',
+     version='1.2.1',
      author="Raphael Patrick Prager",
      author_email="raphael.prager@gmx.de",
      description="A Python implementation and extension to the R package flacco for computing ELA features.",

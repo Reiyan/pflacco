@@ -16,7 +16,7 @@ project = 'pflacco'
 copyright = '2022, Raphael Patrick Prager'
 author = 'Raphael Patrick Prager'
 version = '1.2'
-release = '1.2.0'
+release = '1.2.1'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration

@@ -36,6 +36,17 @@ To directly quote the documentation of flacco:
    The calculation procedure and further background information of ELA features is given in
    Comprehensive Feature-Based Landscape Analysis of Continuous and Constrained Optimization Problems Using the R-Package flacco.
 
+FAQ
+---
+* For some (very few) features the values for the same sample differ between pflacco and flacco:
+This is a known occurence. The differences can be traced back to the underlying methods to calculate the features. For example, ``ela_meta`` relies on linear models. The method to construct a linear model in R is based on qr (quantile regression) whereas the ``LinearModel()`` in scikit-learn uses the conventional OLS method. For a large enough sample, there is no statistical difference. However, to keep this consistent between programming language this issue will be addressed in future version.
+
+* What is the difference between 0.* and 1.* version of pflacco?
+The 0.* version of pflacco provided a simple interface to the programming language R and calculated any landscape features using the R-package flacco. While this is convenient for me as a developer, the downside is that the performance of pflacco is horrendous. Hence, the >=1.* releases of pflacco offer an implementation of almost all features of the R-package flacco in native python. Thereby, the calculation of features is expedited by an order of magnitude.
+
+* Is it possible to calculate landscape features for CEC or Nevergrad?
+Generally speaking, this is definitely possible. However, to the best of my knowledge, Nevergrad does not offer a dedicated API to query single objective functions and the CEC benchmarks are mostly written in C or Matlab.
+Some CEC benchmarks have an unofficial Python wrapper (which is not kept up to date) like `CEC2017 <https://github.com/lacerdamarcelo/cec17_python>`_. These require additional compiling steps to run any of the functions.
 
 Contents
 --------
@@ -43,6 +54,7 @@ Contents
 .. toctree::
 
    installation
+   feature_sets
    getting_started
    api
 
