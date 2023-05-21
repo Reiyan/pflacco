@@ -1,7 +1,7 @@
 numpy~=1.24.3
-scikit-learn~=1.1.2
+scikit-learn~=1.2.2
 pyDOE~=0.3.8
-scipy~=1.9.0
+scipy~=1.10.1
 pandas>=1.2.1,<2.1.0
 numdifftools~=0.9.40
 SALib~=1.4.5
