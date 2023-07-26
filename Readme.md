@@ -1,4 +1,4 @@
-![Github Status](https://github.com/reiyan/pflacco/actions/workflows/python-package.yml/badge.svg?branch=master)
+![Github Status](https://github.com/reiyan/pflacco/actions/workflows/python-package.yml/badge.svg?branch=master) [![Documentation Status](https://readthedocs.org/projects/pflacco/badge/?version=latest)](https://pflacco.readthedocs.io/en/latest/?badge=latest)
 # pflacco: The R-package flacco in native Python code
 For people who are not comfortable with R.
 
@@ -150,6 +150,24 @@ for fid in range(1,25):
             features.append(data)
 
 features = pd.concat(features).reset_index(drop = True)
+```
+
+## Citation
+If you are using pflacco in any capacity, I would appreciate a citation. You can use the following bibtex:
+```
+@article{10.1162/evco_a_00341,
+    author = {Prager, Raphael Patrick and Trautmann, Heike},
+    title = "{Pflacco: Feature-Based Landscape Analysis of Continuous and Constrained Optimization Problems in Python}",
+    journal = {Evolutionary Computation},
+    pages = {1-25},
+    year = {2023},
+    month = {07},
+    abstract = "{The herein proposed Python package pflacco provides a set of numerical features to characterize single-objective continuous and constrained optimization problems. Thereby, pflacco addresses two major challenges in the area optimization. Firstly, it provides the means to develop an understanding of a given problem instance, which is crucial for designing, selecting, or configuring optimization algorithms in general. Secondly, these numerical features can be utilized in the research streams of automated algorithm selection and configuration. While the majority of these landscape features is already available in the R package flacco, our Python implementation offers these tools to an even wider audience and thereby promotes research interests and novel avenues in the area of optimization.}",
+    issn = {1063-6560},
+    doi = {10.1162/evco_a_00341},
+    url = {https://doi.org/10.1162/evco\_a\_00341},
+    eprint = {https://direct.mit.edu/evco/article-pdf/doi/10.1162/evco\_a\_00341/2148122/evco\_a\_00341.pdf},
+}
 ```
 
 ## Documentation
