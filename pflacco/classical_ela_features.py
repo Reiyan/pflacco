@@ -321,9 +321,9 @@ def calculate_nbc(
                                     i = i[-1]
                               else:
                                     raise ValueError('Possible tie breaker methods are "sample", "first", and "last"')
-
-                        # Transform array of length 1 to a single scalar
-                        i = i[0]
+                        else:
+                              # Transform array of length 1 to a single scalar
+                              i = i[0]
 
                         results.append([idx, ind_alt[i], d[i]])
 
@@ -495,7 +495,7 @@ def calculate_information_content(
       """      
       start_time = time.monotonic()
       X, y = _validate_variable_types(X, y)
-
+      
       n = X.shape[1]
       ic_aggregate_duplicated = 'mean'
       if not np.issubdtype(ic_epsilon.dtype, np.number): 
@@ -521,8 +521,8 @@ def calculate_information_content(
             complete = pd.concat([X, pd.DataFrame(y, columns = ['y'])], axis = 1).duplicated()
             # Remove complete duplicates, because these cannot be aggregated using e.g. the mean of y
             if complete.any():
-                  X = X[~complete]
-                  y = y[~complete]
+                  X = X[~complete].reset_index(drop=True)
+                  y = y[~complete].reset_index(drop=True)
                   dup_index = X.duplicated(keep = False)
             
             # TODO Check with Pascal: the next line seems utterly pointless, a flip of the second array is missing. yes double flip.. that is why it is pointless.
@@ -534,7 +534,7 @@ def calculate_information_content(
 
             while len(v) > 1:
                   index = np.array([(Z.iloc[0] == Z.iloc[idx]).all() for idx in range(Z.shape[0])])
-                  X = pd.concat([X, Z.iloc[[0]]], ignore_index = True)
+                  X = pd.concat([X, Z.iloc[[0]]], ignore_index = True).reset_index(drop = True)
                   Z = Z[~index]
                   y = pd.concat([y, pd.DataFrame([v[index].mean()])], ignore_index = True)
                   v = v[~index]
