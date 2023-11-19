@@ -72,7 +72,7 @@ def create_initial_sample(
       if sample_type == 'lhs':
             X = lhs(dim, samples = n)
       elif sample_type == 'sobol':
-            sampler = Sobol(d = dim, seed = 50)
+            sampler = Sobol(d = dim, seed = seed)
             X = sampler.random(n)
       else:
             X = np.random.rand(n, dim)
