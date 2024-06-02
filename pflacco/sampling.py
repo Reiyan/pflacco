@@ -16,6 +16,7 @@ def create_initial_sample(
       lower_bound: Union[List[float], float] = 0,
       upper_bound: Union[List[float], float] = 1,
       sample_type: str = 'lhs',
+      categorical_values: Optional[List[Union[str, List[str]]]] = None,
       seed: Optional[int] = None) -> pd.DataFrame:
       """Sampling of the decision space.
 
@@ -30,13 +31,23 @@ def create_initial_sample(
           Factor which is used to determine the sample size in conjuction
           with the problem dimensionality, by default 50.
       lower_bound : Union[List[float], float], optional
-          Lower bound of variables of the decision space, by default 0.
+          Lower bound of variables of the decision space.
+          In case of mixed search spaces values at the index of the categorical
+          variables will be ignored, by default 0.
       upper_bound : Union[List[float], float], optional
-          Upper bound of variables of the decision space, by default 1.
+          Upper bound of variables of the decision space.
+           In case of mixed search spaces values at the index of the categorical
+          variables will be ignored, by default 1.
       sample_type : str, optional
           Type of sampling strategy. Should be one of ('lhs', 'random', 'sobol'), by default 'lhs'.
+      categorical_values : Optional[List[List[str]]], optional
+          List of the variable types of the decision space.
+          Continuous variables are abbreviated as 'cont', integer as 'int' and categorical variables
+          are represented by a list of their respective values. E.g. for a search space with a continuous, an integer 
+          and a categorical variable the input could look like this ['cont', 'int', ['val1', 'val2']].
+          Note, that the order is important, by default None.
       seed : Optional[int], optional
-          Seed for reproducability, by default None
+          Seed for reproducability, by default None.
 
       Returns
       -------
@@ -46,7 +57,8 @@ def create_initial_sample(
 
       if sample_type not in ['lhs', 'random', 'sobol']:
             raise ValueError('Unknown sample type selected. Valid options are "lhs", "sobol", and "random"')
-
+      if categorical_values is not None and sample_type != 'random':
+            raise NotImplementedError('Currently, only "random" sampling is enabled for mixed search spaces.')
       if not isinstance(lower_bound, list) and type(lower_bound) is not np.ndarray:
             lower_bound = np.array([lower_bound] * dim)
       if isinstance(lower_bound, list):
@@ -66,6 +78,10 @@ def create_initial_sample(
       if n is None:
             n = dim * sample_coefficient
 
+      if categorical_values is not None:
+            cat_idx = [x for x in range(len(categorical_values)) if type(categorical_values[x]) is list]
+            int_idx = [x for x in range(len(categorical_values)) if categorical_values[x] == 'int']
+
       if seed is not None:
             np.random.seed(seed)
 
@@ -77,7 +93,16 @@ def create_initial_sample(
       else:
             X = np.random.rand(n, dim)
       
-      X = X * (upper_bound - lower_bound) + lower_bound
+      if categorical_values is None:
+            X = X * (upper_bound - lower_bound) + lower_bound
+      else:
+            X = X.transpose().tolist()
+            for i in cat_idx:
+                  X[i] = np.random.choice(categorical_values[i], n) 
+            for i in int_idx:
+                  X[i] = np.random.randint(lower_bound[i], upper_bound[i] + 1, n)
+            X = np.array(X).transpose()
+            
       colnames = ['x' + str(x) for x in range(dim)]
       
       return pd.DataFrame(X, columns = colnames)

@@ -6,7 +6,6 @@ from pflacco.sampling import create_initial_sample
 
 RSC = os.path.join('tests', 'resources')
 
-
 @pytest.mark.parametrize('dim', [2, 5, 10])
 def test_d2_sample(dim):
     np.random.seed(50)
@@ -31,5 +30,13 @@ def test_random_sample():
     expected = pd.read_pickle(os.path.join(RSC, f'random_sample.pkl'))
     assert sample.equals(expected)
 
+def test_random_mixed_search_space_sample(x_mixed_search_space_sample):
+    np.random.seed(50)
+    sample = create_initial_sample(3, sample_coefficient= 3, sample_type = 'random', categorical_values = ['cont', 'int', ['val1', 'val2', 'val3']])
+    assert sample.equals(x_mixed_search_space_sample)
 
-
+def test_random_mixed_search_space_sample_not_implemented():
+    with pytest.raises(NotImplementedError) as e:  
+        sample = create_initial_sample(2, sample_type = 'lhs', categorical_values = [None, ['val1', 'val2', 'val3']])
+    assert str(e.value) == 'Currently, only "random" sampling is enabled for mixed search spaces.'
+    
