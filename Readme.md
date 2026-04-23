@@ -39,9 +39,11 @@ Some CEC benchmarks have an unofficial Python wrapper (which is not kept up to d
 For a stable (and tested) outcome, pflacco requires at least [Python>=3.8](https://www.python.org/downloads/release/python-364/)
 
 ## Setup
-Easy as it usually is in Python:
+
+Use `uv` or similar:
+
 ```bash
-python -m pip install pflacco
+uv add pflacco
 ```
 
 ## Quickstart
