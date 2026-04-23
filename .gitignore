@@ -8,3 +8,4 @@ pflacco.egg-info/
 .Rhistory
 *.csv
 *.pyc
+.venv/

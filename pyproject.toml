@@ -1,8 +1,10 @@
 [project]
 name = "pflacco"
 version = "1.2.2"
-description = "Feature-based Landscape Analysis of Continuous and Constrained Optimization problems."
+description = "A Python implementation and extension to the R package flacco for computing ELA features."
+authors = [{name = "Raphael Patrick Prager", email = "raphael.prager@gmx.de"}]
 readme = "Readme.md"
+license = "MIT"
 requires-python = ">=3.10"
 dependencies = [
   "numdifftools>=0.9.42",
