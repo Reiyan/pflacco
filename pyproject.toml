@@ -1,0 +1,31 @@
+[project]
+name = "pflacco"
+version = "1.2.2"
+description = "Feature-based Landscape Analysis of Continuous and Constrained Optimization problems."
+readme = "Readme.md"
+requires-python = ">=3.10"
+dependencies = []
+
+[dependency-groups]
+dev = [
+    "deptry>=0.25.1",
+    "pytest>=9.0.3",
+    "ruff>=0.15.11",
+]
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.ruff.lint.isort]
+force-single-line = true
+
+[build-system]
+requires = ["uv_build>=0.8,<0.11"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "pflacco"
+module-root = ""
