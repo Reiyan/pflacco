@@ -4,10 +4,19 @@ version = "1.2.2"
 description = "Feature-based Landscape Analysis of Continuous and Constrained Optimization problems."
 readme = "Readme.md"
 requires-python = ">=3.10"
-dependencies = []
+dependencies = [
+  "numdifftools>=0.9.42",
+  "numpy>=2",
+  "pandas>=2.3.3",
+  "pydoe>=0.9.9",
+  "salib>=1.5.2",
+  "scikit-learn>=1.7.2",
+  "scipy>=1.15.3",
+]
 
 [dependency-groups]
 dev = [
+    "ioh>=0.3.22",
     "deptry>=0.25.1",
     "pytest>=9.0.3",
     "ruff>=0.15.11",
