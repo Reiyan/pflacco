@@ -20,7 +20,13 @@ As a result, all cell mapping features can only be calculated when the sample si
 
 .. math::
 
-    3 \cdot d^{blocks} \leq n
+    3 \cdot \prod_{i=1}^{d} blocks_i \leq n
+
+which, for an identical number of blocks in every dimension, simplifies to
+
+.. math::
+
+    3 \cdot blocks^{d} \leq n
 
 
 Angle

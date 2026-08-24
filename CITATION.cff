@@ -1,0 +1,38 @@
+cff-version: 1.2.0
+message: "If you use pflacco in any capacity, please cite it using these metadata."
+title: "pflacco: A Python implementation and extension to the R package flacco for computing ELA features"
+abstract: "pflacco provides a set of numerical features to characterize single-objective continuous and constrained optimization problems. These features can be used to develop an understanding of a given problem instance and serve as the basis for automated algorithm selection and configuration."
+type: software
+authors:
+  - family-names: "Prager"
+    given-names: "Raphael Patrick"
+    email: "raphael.prager@uni-muenster.de"
+  - family-names: "Trautmann"
+    given-names: "Heike"
+version: 1.2.2
+date-released: "2023-08-25"
+license: MIT
+repository-code: "https://github.com/Reiyan/pflacco"
+url: "https://pflacco.readthedocs.io/en/latest/index.html"
+keywords:
+  - "exploratory landscape analysis"
+  - "black-box optimization"
+  - "continuous optimization"
+  - "automated algorithm selection"
+  - "python"
+preferred-citation:
+  type: article
+  title: "Pflacco: Feature-Based Landscape Analysis of Continuous and Constrained Optimization Problems in Python"
+  authors:
+    - family-names: "Prager"
+      given-names: "Raphael Patrick"
+    - family-names: "Trautmann"
+      given-names: "Heike"
+  journal: "Evolutionary Computation"
+  year: 2023
+  month: 7
+  start: 1
+  end: 25
+  issn: "1063-6560"
+  doi: "10.1162/evco_a_00341"
+  url: "https://doi.org/10.1162/evco_a_00341"
