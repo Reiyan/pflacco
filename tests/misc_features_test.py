@@ -1,6 +1,8 @@
 import os
 import pandas as pd
 from pandas.testing import assert_frame_equal
+
+from .conftest import _read_fixture
 import platform
 import pytest
 
@@ -20,7 +22,7 @@ else:
 
 @pytest.fixture
 def feature_values():
-    X = pd.read_pickle(os.path.join(RSC, 'test_misc_ela_features.pkl'))
+    X = _read_fixture(os.path.join(RSC, 'test_misc_ela_features.pkl'))
     return X
 
 def test_calculate_fitness_distance_correlation(x_samples, feature_values):
@@ -29,7 +31,7 @@ def test_calculate_fitness_distance_correlation(x_samples, feature_values):
         for dim in DIMS:
             tmp = x_samples.iloc[:(dim*50), :dim]
             f = get_problem(fid, 1, dim)
-            y = tmp.apply(lambda x: f(x), axis = 1)
+            y = tmp.apply(lambda x: f(x.values), axis = 1)
             features = calculate_fitness_distance_correlation(tmp, y)
             data = pd.DataFrame(features, index = [0])
             data['fid'] = fid

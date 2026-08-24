@@ -1,6 +1,8 @@
 import os
 import pandas as pd
 from pandas.testing import assert_frame_equal
+
+from .conftest import _read_fixture
 import platform
 import pytest
 from ioh import get_problem
@@ -19,7 +21,7 @@ else:
 
 @pytest.fixture
 def feature_values():
-    X = pd.read_pickle(os.path.join(RSC, 'test_lon_features.pkl'))
+    X = _read_fixture(os.path.join(RSC, 'test_lon_features.pkl'))
     return X
 
 def test_calculate_lon_features(feature_values):

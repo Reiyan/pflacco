@@ -4,6 +4,13 @@ import pytest
 
 RSC = os.path.join('tests', 'resources')
 
+def _read_fixture(path):
+    X = pd.read_pickle(path)
+    # The pickles store an object-dtype column index, whereas pandas >=3 creates a
+    # string-dtype one for freshly built frames. Rebuild it to match the running pandas.
+    X.columns = pd.Index(list(X.columns))
+    return X
+
 @pytest.fixture(scope="package")
 def x_samples():
     X = pd.read_pickle(os.path.join(RSC, 'init_sample.pkl'))

@@ -7,7 +7,7 @@ from pflacco.sampling import *
 from pflacco.local_optima_network_features import *
 import os
 import pandas as pd
-from ioh import get_problem, ProblemType
+from ioh import get_problem, ProblemClass
 
 DIMS = [2, 5, 10]
 RSC = os.path.join('tests', 'resources')
@@ -33,8 +33,8 @@ def gen_classical_features():
     for fid in range(1,25):
         for dim in DIMS:
             tmp = x_samples.iloc[:(dim*50), :dim]
-            f = get_problem(fid, 1, dim, ProblemType.BBOB)
-            y = tmp.apply(lambda x: f(x), axis = 1)
+            f = get_problem(fid, 1, dim, ProblemClass.BBOB)
+            y = tmp.apply(lambda x: f(x.values), axis = 1)
             ela_meta = calculate_ela_meta(tmp, y)
             ela_distr = calculate_ela_distribution(tmp, y)
             ela_level = calculate_ela_level(tmp, y)
@@ -59,8 +59,8 @@ def gen_misc_features():
     for fid in range(1,25):
         for dim in DIMS:
             tmp = x_samples.iloc[:(dim*50), :dim]
-            f = get_problem(fid, 1, dim, ProblemType.BBOB)
-            y = tmp.apply(lambda x: f(x), axis = 1)
+            f = get_problem(fid, 1, dim, ProblemClass.BBOB)
+            y = tmp.apply(lambda x: f(x.values), axis = 1)
             hc = calculate_hill_climbing_features(f, dim, lower_bound = -5, upper_bound = 5, seed = 200)
             fd = calculate_fitness_distance_correlation(tmp, y)
             grad = calculate_gradient_features(f, dim, lower_bound=-5, upper_bound=5, seed = 200, budget_factor_per_dim = 10)
@@ -80,7 +80,7 @@ def gen_lon_features():
     result = []
     for fid in range(1,25):
         for dim in DIMS:
-            f = get_problem(fid, 1, dim, ProblemType.BBOB)
+            f = get_problem(fid, 1, dim, ProblemClass.BBOB)
             nodes, edges = compute_local_optima_network(f, dim, lower_bound=-5, upper_bound=5, seed = 200, basin_hopping_iteration = 10, stopping_threshold= 100)
             features = calculate_lon_features(nodes, edges)
             data = pd.DataFrame(features, index = [0])
@@ -100,7 +100,7 @@ def lon_investigation():
     for rep in range(10):
         fid = 3
         dim = 2
-        f = get_problem(fid, 1, dim, ProblemType.BBOB)
+        f = get_problem(fid, 1, dim, ProblemClass.BBOB)
         nodes, edges = compute_local_optima_network(f, dim, lower_bound=-5, upper_bound=5, seed = 200, basin_hopping_iteration = 10, stopping_threshold= 100)
         features = calculate_lon_features(nodes, edges)
         data = pd.DataFrame(features, index = [0])
@@ -118,8 +118,8 @@ def ls_investigation():
         dim = 3
         fid = 1
         tmp = x_samples.iloc[:(dim*50), :dim]
-        f = get_problem(fid, 1, dim, ProblemType.BBOB)
-        y = tmp.apply(lambda x: f(x), axis = 1)
+        f = get_problem(fid, 1, dim, ProblemClass.BBOB)
+        y = tmp.apply(lambda x: f(x.values), axis = 1)
         ls = calculate_length_scales_features(f, dim, lower_bound=-5, upper_bound=5, seed = 200, budget_factor_per_dim = 10)
         data = pd.DataFrame({**ls}, index = [0])
         result.append(data)
@@ -136,8 +136,8 @@ def gen_cell_features():
             if dim == 5:
                 force = True
             tmp = x_samples.iloc[:n, :dim]
-            f = get_problem(fid, 1, dim, ProblemType.BBOB)
-            y = tmp.apply(lambda x: f(x), axis = 1)
+            f = get_problem(fid, 1, dim, ProblemClass.BBOB)
+            y = tmp.apply(lambda x: f(x.values), axis = 1)
             cm_angle = calculate_cm_angle(tmp, y, lower_bound = -5, upper_bound = 5, blocks = 3, force = force)
             cm_conv = calculate_cm_conv(tmp, y, lower_bound = -5, upper_bound = 5, blocks = 3, force = force)
             cm_grad = calculate_cm_grad(tmp, y, lower_bound = -5, upper_bound = 5, blocks = 3, force = force)

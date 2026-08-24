@@ -39,4 +39,9 @@ def test_random_mixed_search_space_sample_not_implemented():
     with pytest.raises(NotImplementedError) as e:  
         sample = create_initial_sample(2, sample_type = 'lhs', categorical_values = [None, ['val1', 'val2', 'val3']])
     assert str(e.value) == 'Currently, only "random" sampling is enabled for mixed search spaces.'
-    
+
+# https://github.com/Reiyan/pflacco/issues/42
+def test_sobol_sample_honours_seed():
+    kwargs = dict(sample_type = 'sobol')
+    assert create_initial_sample(2, 8, seed = 1, **kwargs).equals(create_initial_sample(2, 8, seed = 1, **kwargs))
+    assert not create_initial_sample(2, 8, seed = 1, **kwargs).equals(create_initial_sample(2, 8, seed = 2, **kwargs))
