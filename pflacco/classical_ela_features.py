@@ -24,14 +24,10 @@ from typing import Callable, Dict, List, Optional, Union
 from .utils import _determine_max_n_blocks, _create_blocks, _validate_variable_types, _transform_bounds_to_canonical, _check_blocks_variable, _cartesian_product_efficient, _normalize_objective, _normalize_objective_with_scale
 
 
-def _calculate_num_derivate(f, lower_bound, upper_bound, delta, eps, zero_tol, x):
-      # Dead code: mirrors the one-sided differencing near the bounds which R's
-      # numDeriv supports via its `side` argument. numdifftools has no such
-      # option, so `side` was never used. Kept for reference.
-      #h0 = np.abs(delta * x) + eps * (np.abs(x) < zero_tol)
-      #side = 1 * ((x - lower_bound) <= h0) - 1 * ((upper_bound - x) <= h0)
-      #side = np.array([np.nan if x == 0 else x for x in side])
-
+def _calculate_num_derivate(f, x):
+      # R's numDeriv can switch to one-sided differencing near the bounds via its
+      # `side` argument. numdifftools offers no such option, hence the parameters
+      # which used to control it (delta, eps and zero_tol) have been removed.
       grad = np.abs(Gradient(f, method = 'central')(x))
       gr_norm = np.sqrt(np.sum(grad ** 2))
       if grad.min() > 0:
@@ -1419,12 +1415,7 @@ def calculate_ela_curvate(
       y: Union[pd.Series, np.ndarray, List[float]],
       f: Callable[[List[float]], float],
       dim: int,
-      lower_bound: Union[List[float], float],
-      upper_bound: Union[List[float], float],
       sample_size_factor: int = 100,
-      delta: float = 10**-4,
-      eps: float = 10**-4,
-      zero_tol: float = np.sqrt(np.nextafter(0, 1)/70**-7),
       seed: Optional[int] = None,
       normalize: bool = False) -> Dict[str, Union[int, float]]:
       """ELA Curvature features.
@@ -1447,21 +1438,8 @@ def calculate_ela_curvate(
           Objective function to be optimized.
       dim : int
           Dimensionality of the decision space.
-      lower_bound : Union[List[float], float]
-          Lower bound of variables of the decision space.
-      upper_bound : Union[List[float], float]
-          Upper bound of variables of the decision space.
       sample_size_factor : int, optional
           Factor which determines the sample size by `sample_size_factor * dim`, by default 100.
-      delta : float, optional
-          Parameter used to approximate the gradient and hessian.
-          See `grad` and `hessian` of the R-package numDeriv for more details, by default 10**-4.
-      eps : float, optional
-          Parameter used to approximate the gradient and hessian.
-          See `grad` and `hessian` of the R-package numDeriv for more details, by default 10**-4.
-      zero_tol : float, optional
-          Parameter used to approximate the gradient and hessian.
-          See `grad` and `hessian` of the R-package numDeriv for more details, by default np.sqrt(np.nextafter(0, 1)/70**-7).
       seed : Optional[int], optional
           Seed for reproducability, by default None.
       normalize : bool, optional
@@ -1481,7 +1459,6 @@ def calculate_ela_curvate(
       if normalize:
             y, y_min, y_range = _normalize_objective_with_scale(y)
             f = lambda x, _f = f: (_f(x) - y_min)/y_range
-      lower_bound, upper_bound = _transform_bounds_to_canonical(dim, lower_bound, upper_bound)
       if seed is not None:
             np.random.seed(seed)
 
@@ -1497,7 +1474,7 @@ def calculate_ela_curvate(
       original_f = f
       f = partial(decorator, original_f)
 
-      wfunc = partial(_calculate_num_derivate, f, lower_bound, upper_bound, delta, eps, zero_tol)
+      wfunc = partial(_calculate_num_derivate, f)
       derivs = X.sample(N).apply(lambda x: wfunc(x.values), axis = 1)
       derivs = np.array([x for x in derivs]).T
       

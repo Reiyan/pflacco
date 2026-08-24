@@ -42,7 +42,7 @@ def gen_classical_features():
             disp = calculate_dispersion(tmp, y)
             pca = calculate_pca(tmp, y)
             ela_local = calculate_ela_local(tmp, y, f, dim, -5, 5, seed = 100)
-            ela_curv = calculate_ela_curvate(tmp, y, f, dim, -5, 5, seed = 100)
+            ela_curv = calculate_ela_curvate(tmp, y, f, dim, seed = 100)
             ela_conv = calculate_ela_conv(tmp, y, f, seed = 100)
             ic = calculate_information_content(tmp, y, seed = 100)
 

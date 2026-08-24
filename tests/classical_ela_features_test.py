@@ -156,7 +156,7 @@ def test_calculate_ela_curvate(x_samples, feature_values):
             tmp = x_samples.iloc[:(dim*50), :dim]
             f = get_problem(fid, 1, dim)
             y = tmp.apply(lambda x: f(x.values), axis = 1)
-            features = calculate_ela_curvate(tmp, y, f, dim, -5, 5, seed = 100)
+            features = calculate_ela_curvate(tmp, y, f, dim, seed = 100)
             data = pd.DataFrame(features, index = [0])
             data['fid'] = fid
             data['dim'] = dim
@@ -345,7 +345,7 @@ def test_ela_curv_matches_analytical_sphere():
     f = lambda x: float(np.sum(np.asarray(x) ** 2))
     X = create_initial_sample(2, 200, lower_bound = -5.12, upper_bound = 5.12, seed = 42)
     y = X.apply(lambda x: f(x.values), axis = 1)
-    features = calculate_ela_curvate(X, y, f, 2, -5.12, 5.12, seed = 42)
+    features = calculate_ela_curvate(X, y, f, 2, seed = 42)
 
     assert features['ela_curv.grad_norm.max'] <= 14.49
     assert np.isclose(features['ela_curv.hessian_cond.max'], 1)
@@ -362,7 +362,7 @@ def test_normalize_makes_features_shift_and_scale_invariant(feature_set, x_sampl
         'ela_meta':  lambda fn, yy: calculate_ela_meta(X, yy, normalize = True),
         'ic':        lambda fn, yy: calculate_information_content(X, yy, seed = 1, normalize = True),
         'limo':      lambda fn, yy: calculate_limo(X, yy, lower_bound = -5, upper_bound = 5, blocks = 3, normalize = True),
-        'ela_curv':  lambda fn, yy: calculate_ela_curvate(X, yy, fn, dim, -5, 5, seed = 1, normalize = True),
+        'ela_curv':  lambda fn, yy: calculate_ela_curvate(X, yy, fn, dim, seed = 1, normalize = True),
     }
     original = calls[feature_set](f, y)
     shifted = calls[feature_set](g, 3.7 * y - 100)

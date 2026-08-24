@@ -37,7 +37,7 @@ Below you find a code example.
    
    # Compute the remaining 3 feature sets from the classical ELA features which do require additional function evaluations
    ela_local = calculate_ela_local(X, y, f = objective_function, dim = dim, lower_bound = -1, upper_bound = 1)
-   ela_curv = calculate_ela_curvate(X, y, f = objective_function, dim = dim, lower_bound = -1, upper_bound = 1)
+   ela_curv = calculate_ela_curvate(X, y, f = objective_function, dim = dim)
    ela_conv = calculate_ela_conv(X, y, f = objective_function)
 
 
