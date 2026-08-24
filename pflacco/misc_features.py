@@ -10,7 +10,7 @@ from scipy.spatial.distance import pdist, squareform
 from scipy.stats import entropy, gaussian_kde, moment
 from typing import Callable, Dict, List, Optional, Union
 
-from .utils import _transform_bounds_to_canonical, _validate_variable_types, _determine_max_n_blocks, _check_blocks_variable, _create_blocks
+from .utils import _transform_bounds_to_canonical, _validate_variable_types, _determine_max_n_blocks, _check_blocks_variable, _create_blocks, _normalize_objective
 from .sampling import _create_local_search_sample, create_initial_sample, _levy_random_walk
 
 def calculate_hill_climbing_features(
@@ -188,7 +188,8 @@ def calculate_fitness_distance_correlation(
       f_opt: Optional[float] = None,
       proportion_of_best: float = 0.1,
       minimize: bool = True,
-      minkowski_p: int = 2) -> Dict[str, Union[int, float]]:
+      minkowski_p: int = 2,
+      normalize: bool = False) -> Dict[str, Union[int, float]]:
       """Calculation of Fitness Distance Correlation features in accordance to [1] and [2].
       
       - fd_{correlation, cov}: Correlation/Covariance between the fitness values f_i and the respective distance d_i, where d_i is the distance in the decision space between the given observation x_i and the sampled x*
@@ -212,6 +213,10 @@ def calculate_fitness_distance_correlation(
           Indicator whether the objective function should be minimized or maximized, by default True.
       minkowski_p : int, optional
           The p-norm to apply for Minkowski, by default 2.
+      normalize : bool, optional
+          Whether the objective values are min-max normalized to [0, 1] before the features
+          are computed. This nullifies the bias of features which are not shift and scale
+          invariant, cf. Prager and Trautmann (2023), by default False.
 
       Returns
       -------
@@ -232,6 +237,8 @@ def calculate_fitness_distance_correlation(
             raise ValueError('Proportion of the best samples must be in the interval (0, 1]')
     
       X, y = _validate_variable_types(X, y)
+      if normalize:
+            y = _normalize_objective(y)
 
       if not minimize:
             y = y * -1

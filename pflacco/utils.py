@@ -40,6 +40,25 @@ def _validate_variable_types(X, y):
             raise Exception('pd.DataFrame X and pd.Series y must provide the same amount of observation.')
       return X, y
 
+# Min-max normalization of the objective values, cf. Prager and Trautmann (2023):
+# "Nullifying the Inherent Bias of Non-invariant Exploratory Landscape Analysis Features".
+def _normalize_objective(y):
+      y_norm, _, _ = _normalize_objective_with_scale(y)
+      return y_norm
+
+# Same normalization, but additionally returns the offset and range it was based on.
+# Feature sets which evaluate the objective function themselves need those to wrap `f`
+# in the very same transformation, e.g. f_norm = lambda x: (f(x) - y_min)/y_range.
+def _normalize_objective_with_scale(y):
+      y_min = y.min()
+      y_range = y.max() - y_min
+      if y_range == 0:
+            # A constant objective offers no range to normalize against. Report this the
+            # way the feature computations report degenerate input, i.e. with NaN.
+            warnings.warn('The objective values are constant and can therefore not be normalized. All features which depend on the objective values will be NaN.')
+            return y * np.nan, y_min, np.nan
+      return (y - y_min)/y_range, y_min, y_range
+
 # Helper function to transform scalar bounds to an N * D array, where D is the dimensionality and N the different lower/upper bounds of the respective dimensions.
 def _transform_bounds_to_canonical(dim, lower_bound, upper_bound):
       if lower_bound is None or upper_bound is None:
@@ -60,40 +79,39 @@ def _transform_bounds_to_canonical(dim, lower_bound, upper_bound):
       return lower_bound, upper_bound
 
 def _determine_max_n_blocks(X):
+      # The grid spans blocks^d cells and every cell should hold at least three
+      # observations, i.e. the sample size n has to satisfy 3 * blocks^d <= n.
       blocks = 1
-      while (X.shape[1] ** (blocks + 1)) * 3 < X.shape[0]:
+      while 3 * ((blocks + 1) ** X.shape[1]) <= X.shape[0]:
             blocks += 1
       return blocks
 
 def _check_blocks_variable(X, dim, blocks, force = False):
-      if blocks is None:
+      # A block count that pflacco picked itself is reported as a warning rather than
+      # rejected, since the caller did not provide a value which could be lowered.
+      auto = blocks is None
+      if auto:
             blocks = max(_determine_max_n_blocks(X), 2)
-      else:
-            n_bl = _determine_max_n_blocks(X)
-            if isinstance(blocks, int):
-                  if blocks > n_bl:
-                        if force == False:
-                              raise ValueError('The provided value for "block" is too large, resulting in less than 3 observations per cell.')
-                        else:
-                              warnings.warn(f'For the given dataframe X, the recommended maximum number of blocks per dim is {n_bl}. The current value for blocks ({blocks}) exceeds that.')
-            else:
-                  if (np.array(blocks) > n_bl).any():
-                        if force == False:
-                              raise ValueError('The provided value for "block" is too large, resulting in less than 3 observations per cell.')
-                        else:
-                              warnings.warn(f'For the given dataframe X, the recommended maximum number of blocks per dim is {n_bl}. The current value for blocks ({blocks}) exceeds that.')
-                  
+
       if not isinstance(blocks, list) and type(blocks) is not np.ndarray:
             blocks = np.array([blocks] * dim)
       elif isinstance(blocks, list):
             blocks = np.array(blocks)
       if len(blocks) != dim:
             raise Exception('The provided value for "block" does not have the same length as the dimensionality of X.')
-      
+
+      # Minimum sample size to retain three observations per cell.
+      min_sample_size = 3 * np.prod(blocks)
+      if min_sample_size > X.shape[0]:
+            if force or auto:
+                  warnings.warn(f'For the given dataframe X, blocks {blocks.tolist()} require at least {min_sample_size} observations to retain 3 observations per cell. X only provides {X.shape[0]}.')
+            else:
+                  raise ValueError('The provided value for "block" is too large, resulting in less than 3 observations per cell.')
+
       return blocks
 
 def _create_blocks(X, y, lower_bound, upper_bound, blocks = None):
-      X, y, _validate_variable_types(X, y)
+      X, y = _validate_variable_types(X, y)
       dim = X.shape[1]
       lower_bound, upper_bound = _transform_bounds_to_canonical(dim, lower_bound, upper_bound)
 
@@ -102,7 +120,7 @@ def _create_blocks(X, y, lower_bound, upper_bound, blocks = None):
 
       cell_ids = []
       for idx, row in X.iterrows():
-            cid = [cp[ndim] * np.floor((row[ndim] - lower_bound[ndim]) / block_widths[ndim]) for ndim in range(X.shape[1])]
+            cid = [cp[ndim] * np.floor((row.iloc[ndim] - lower_bound[ndim]) / block_widths[ndim]) for ndim in range(X.shape[1])]
             cell_ids.append((cid - cp[:-1] * (row == upper_bound)).sum()) 
       cell_ids = np.array(cell_ids)
 

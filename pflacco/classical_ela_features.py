@@ -17,26 +17,27 @@ from sklearn.preprocessing import PolynomialFeatures
 from scipy.spatial.distance import pdist, squareform
 from scipy.stats import gaussian_kde, pearsonr
 from scipy.optimize import minimize as scipy_minimize
-from scipy.cluster.hierarchy import linkage, cut_tree, _order_cluster_tree
+from scipy.cluster.hierarchy import linkage, cut_tree
 
 from typing import Callable, Dict, List, Optional, Union
 
-from .utils import _determine_max_n_blocks, _create_blocks, _validate_variable_types, _transform_bounds_to_canonical, _check_blocks_variable, _cartesian_product_efficient
+from .utils import _determine_max_n_blocks, _create_blocks, _validate_variable_types, _transform_bounds_to_canonical, _check_blocks_variable, _cartesian_product_efficient, _normalize_objective, _normalize_objective_with_scale
 
 
 def _calculate_num_derivate(f, lower_bound, upper_bound, delta, eps, zero_tol, x):
-      h0 = np.abs(delta * x) + eps * (np.abs(x) < zero_tol)
-      side = 1 * ((x - lower_bound) <= h0) - 1 * ((upper_bound - x) <= h0)
-      side = np.array([np.nan if x == 0 else x for x in side])
+      # Dead code: mirrors the one-sided differencing near the bounds which R's
+      # numDeriv supports via its `side` argument. numdifftools has no such
+      # option, so `side` was never used. Kept for reference.
+      #h0 = np.abs(delta * x) + eps * (np.abs(x) < zero_tol)
+      #side = 1 * ((x - lower_bound) <= h0) - 1 * ((upper_bound - x) <= h0)
+      #side = np.array([np.nan if x == 0 else x for x in side])
 
       grad = np.abs(Gradient(f, method = 'central')(x))
+      gr_norm = np.sqrt(np.sum(grad ** 2))
       if grad.min() > 0:
             gr_scale = grad.max()/grad.min()
-            gr_scale_norm = np.sqrt(np.sum(gr_scale) ** 2)
-
       else:
             gr_scale = np.nan
-            gr_scale_norm = np.nan
       
       hess = Hessian(f, method = 'central')(x)
       eig = np.abs(np.linalg.eig(hess)[0])
@@ -46,11 +47,12 @@ def _calculate_num_derivate(f, lower_bound, upper_bound, delta, eps, zero_tol, x
       else:
             hess_cond = np.nan
       
-      return np.array([gr_scale_norm, gr_scale, hess_cond])
+      return np.array([gr_norm, gr_scale, hess_cond])
 
 def calculate_ela_meta(
       X: Union[pd.DataFrame, np.ndarray, List[List[float]]],
-      y: Union[pd.Series, np.ndarray, List[float]]) -> Dict[str, Union[int, float]]:
+      y: Union[pd.Series, np.ndarray, List[float]],
+      normalize: bool = False) -> Dict[str, Union[int, float]]:
       """ELA Meta features.
       Given an initial design, linear and quadratic models of the form objective ~ features are created.
       Both versions are created with and without simple interactions (e.g., x1:x2). Based on those models, the following features are computed:
@@ -67,6 +69,10 @@ def calculate_ela_meta(
           Can be created with :py:func:`pflacco.sampling.create_initial_sample`.
       y : Union[pd.Series, np.ndarray, List[float]]
           A list-like object which contains the respective objective values of `X`.
+      normalize : bool, optional
+          Whether the objective values are min-max normalized to [0, 1] before the features
+          are computed. This nullifies the bias of features which are not shift and scale
+          invariant, cf. Prager and Trautmann (2023), by default False.
 
       Returns
       -------
@@ -76,6 +82,8 @@ def calculate_ela_meta(
       start_time = time.monotonic()
 
       X, y = _validate_variable_types(X, y)
+      if normalize:
+            y = _normalize_objective(y)
 
       # Create liner model and calculate lm features
       model = linear_model.LinearRegression()
@@ -139,7 +147,8 @@ def calculate_pca(
       prop_cov_x: float = 0.9,
       prop_cor_x: float = 0.9,
       prop_cov_init: float = 0.9,
-      prop_cor_init: float = 0.9) -> Dict[str, Union[int, float]]:
+      prop_cor_init: float = 0.9,
+      normalize: bool = False) -> Dict[str, Union[int, float]]:
       """Principal component (analysis) features.
       
       - expl_var.{cov, cor}_{x, init}: proportion of the explained variance when applying PCA to the covariance / correlation matrix of the decision space (x) or the entire initial design (init)
@@ -164,6 +173,10 @@ def calculate_pca(
       prop_cor_init : float, optional
           Proportion of the explained variance by the first
           PC based on the correlation matrix, by default 0.9.
+      normalize : bool, optional
+          Whether the objective values are min-max normalized to [0, 1] before the features
+          are computed. This nullifies the bias of features which are not shift and scale
+          invariant, cf. Prager and Trautmann (2023), by default False.
 
       Returns
       -------
@@ -172,6 +185,8 @@ def calculate_pca(
       """      
       start_time = time.monotonic()
       X, y = _validate_variable_types(X, y)
+      if normalize:
+            y = _normalize_objective(y)
 
       # Change name of series for sklearn pca
       y.rename('y', inplace=True)
@@ -444,7 +459,8 @@ def calculate_information_content(
       ic_epsilon: List[float] = np.insert(10 ** np.linspace(start = -5, stop = 15, num = 1000), 0, 0),
       ic_settling_sensitivity: float = 0.05,
       ic_info_sensitivity: float = 0.5,
-      seed: Optional[int] = None) -> Dict[str, Union[int, float]]:
+      seed: Optional[int] = None,
+      normalize: bool = False) -> Dict[str, Union[int, float]]:
       """Information Content features.
       Computes features based on the Information Content of Fitness Sequences (ICoFiS) approach [1].
       In this approach, the information content of a continuous landscape, i.e. smoothness, ruggedness, or neutrality, are quantified.
@@ -480,6 +496,10 @@ def calculate_information_content(
           Portion of partial information sensitivity of [1], by default 0.5
       seed : Optional[int], optional
           Seed for reproducability, by default None
+      normalize : bool, optional
+          Whether the objective values are min-max normalized to [0, 1] before the features
+          are computed. This nullifies the bias of features which are not shift and scale
+          invariant, cf. Prager and Trautmann (2023), by default False.
 
       Returns
       -------
@@ -495,6 +515,8 @@ def calculate_information_content(
       """      
       start_time = time.monotonic()
       X, y = _validate_variable_types(X, y)
+      if normalize:
+            y = _normalize_objective(y)
       
       n = X.shape[1]
       ic_aggregate_duplicated = 'mean'
@@ -536,7 +558,7 @@ def calculate_information_content(
                   index = np.array([(Z.iloc[0] == Z.iloc[idx]).all() for idx in range(Z.shape[0])])
                   X = pd.concat([X, Z.iloc[[0]]], ignore_index = True).reset_index(drop = True)
                   Z = Z[~index]
-                  y = pd.concat([y, pd.DataFrame([v[index].mean()])], ignore_index = True)
+                  y = pd.concat([y, pd.Series([v[index].mean()])], ignore_index = True)
                   v = v[~index]
 
             
@@ -739,7 +761,8 @@ def calculate_limo(
       lower_bound: Union[List[float], float],
       upper_bound: Union[List[float], float],
       blocks: Optional[Union[List[int], np.ndarray, int]] = None,
-      force: bool = False) -> Dict[str, Optional[Union[int, float]]]:
+      force: bool = False,
+      normalize: bool = False) -> Dict[str, Optional[Union[int, float]]]:
       """Linear Model features.
       Linear models are computed per cell, provided the decision space is divided into a grid of cells. Each one of the models has the form objective ~ features.
       
@@ -764,9 +787,14 @@ def calculate_limo(
           Number of blocks per dimension, by default None.
       force : bool, optional
           The recommended number of blocks per dim is >2 and the minimum number of observation per cell is 3.
-          Meaning, that X has to have at least dim^blocks * 3 observations. This requirement can be circumenvented
+          Meaning, that X has to have at least 3 * prod(blocks) observations, i.e. 3 * blocks^dim if the same
+          number of blocks is used in every dimension. This requirement can be circumenvented
           by setting `force` to True. 
           ATTENTION: The resulting feature values are not in line with any recommendation and may not have any predictive power, by default False.
+      normalize : bool, optional
+          Whether the objective values are min-max normalized to [0, 1] before the features
+          are computed. This nullifies the bias of features which are not shift and scale
+          invariant, cf. Prager and Trautmann (2023), by default False.
 
       Returns
       -------
@@ -775,6 +803,8 @@ def calculate_limo(
       """      
       start_time = time.monotonic()
       X, y = _validate_variable_types(X, y)
+      if normalize:
+            y = _normalize_objective(y)
       dims = X.shape[1]
       blocks = _check_blocks_variable(X, dims, blocks, force = force)
 
@@ -874,7 +904,8 @@ def calculate_cm_angle(
           Number of blocks per dimension, by default None.
       force : bool, optional
           The recommended number of blocks per dim is >2 and the minimum number of observation per cell is 3.
-          Meaning, that X has to have at least dim^blocks * 3 observations. This requirement can be circumenvented
+          Meaning, that X has to have at least 3 * prod(blocks) observations, i.e. 3 * blocks^dim if the same
+          number of blocks is used in every dimension. This requirement can be circumenvented
           by setting `force` to True. 
           ATTENTION: The resulting feature values are not in line with any recommendation and may not have any predictive power, by default False.
       minimize : bool, optional
@@ -903,7 +934,7 @@ def calculate_cm_angle(
       y_global_best = grid_best['y'].min()
       y_global_worst = grid_worst['y'].max()
       non_empty = np.sort(grid_best['cell'].unique())
-      no_total = np.product(blocks)
+      no_total = np.prod(blocks)
       no_empty = no_total - len(non_empty)
       # TODO if no_total = 1
       
@@ -975,7 +1006,8 @@ def calculate_cm_conv(
           Number of blocks per dimension, by default None.
       force : bool, optional
           The recommended number of blocks per dim is >2 and the minimum number of observation per cell is 3.
-          Meaning, that X has to have at least dim^blocks * 3 observations. This requirement can be circumenvented
+          Meaning, that X has to have at least 3 * prod(blocks) observations, i.e. 3 * blocks^dim if the same
+          number of blocks is used in every dimension. This requirement can be circumenvented
           by setting `force` to True. 
           ATTENTION: The resulting feature values are not in line with any recommendation and may not have any predictive power, by default False.
       minimize : bool, optional
@@ -1041,7 +1073,7 @@ def calculate_cm_conv(
       nearest_grid['represented_cell'] = range(n_cells)
 
       # find linear neighbours
-      max_cells = np.product(blocks) # = n_cells
+      max_cells = np.prod(blocks) # = n_cells
       cell_ids = range(n_cells)
 
       cell_z = []
@@ -1152,7 +1184,8 @@ def calculate_cm_grad(
           Number of blocks per dimension, by default None.
       force : bool, optional
           The recommended number of blocks per dim is >2 and the minimum number of observation per cell is 3.
-          Meaning, that X has to have at least dim^blocks * 3 observations. This requirement can be circumenvented
+          Meaning, that X has to have at least 3 * prod(blocks) observations, i.e. 3 * blocks^dim if the same
+          number of blocks is used in every dimension. This requirement can be circumenvented
           by setting `force` to True. 
           ATTENTION: The resulting feature values are not in line with any recommendation and may not have any predictive power, by default False.
       minimize : bool, optional
@@ -1210,7 +1243,8 @@ def calculate_ela_conv(
       f: Callable[[List[float]], float],
       ela_conv_nsample: int = 1000,
       ela_conv_threshold: float = 1e-10,
-      seed: Optional[int] = None) -> Dict[str, Union[int, float]]:
+      seed: Optional[int] = None,
+      normalize: bool = False) -> Dict[str, Union[int, float]]:
       """ELA Convexity features.
       Two observations are chosen randomly from the initial design. Then, a linear (convex) combination of those observations is calculated based on a random weight from [0, 1].
       The corresponding objective value will be compared to the linear combination of the objectives from the two original observations.
@@ -1235,6 +1269,10 @@ def calculate_ela_conv(
           in order to still be considered linear, by default 1e-10.
       seed : Optional[int], optional
           Seed for reproducability, by default None.
+      normalize : bool, optional
+          Whether the objective values are min-max normalized to [0, 1] before the features
+          are computed. This nullifies the bias of features which are not shift and scale
+          invariant, cf. Prager and Trautmann (2023), by default False.
 
       Returns
       -------
@@ -1243,6 +1281,9 @@ def calculate_ela_conv(
       """      
       start_time = time.monotonic()
       X, y = _validate_variable_types(X, y)
+      if normalize:
+            y, y_min, y_range = _normalize_objective_with_scale(y)
+            f = lambda x, _f = f: (_f(x) - y_min)/y_range
 
       if seed is not None:
             np.random.seed(seed)
@@ -1384,7 +1425,8 @@ def calculate_ela_curvate(
       delta: float = 10**-4,
       eps: float = 10**-4,
       zero_tol: float = np.sqrt(np.nextafter(0, 1)/70**-7),
-      seed: Optional[int] = None) -> Dict[str, Union[int, float]]:
+      seed: Optional[int] = None,
+      normalize: bool = False) -> Dict[str, Union[int, float]]:
       """ELA Curvature features.
 
       Given a feature object, curv.sample_size samples (per default 100 * d with d being the number of features) are randomly chosen.
@@ -1422,6 +1464,10 @@ def calculate_ela_curvate(
           See `grad` and `hessian` of the R-package numDeriv for more details, by default np.sqrt(np.nextafter(0, 1)/70**-7).
       seed : Optional[int], optional
           Seed for reproducability, by default None.
+      normalize : bool, optional
+          Whether the objective values are min-max normalized to [0, 1] before the features
+          are computed. This nullifies the bias of features which are not shift and scale
+          invariant, cf. Prager and Trautmann (2023), by default False.
 
       Returns
       -------
@@ -1432,6 +1478,9 @@ def calculate_ela_curvate(
       start_time = time.monotonic()
 
       X, y = _validate_variable_types(X, y)
+      if normalize:
+            y, y_min, y_range = _normalize_objective_with_scale(y)
+            f = lambda x, _f = f: (_f(x) - y_min)/y_range
       lower_bound, upper_bound = _transform_bounds_to_canonical(dim, lower_bound, upper_bound)
       if seed is not None:
             np.random.seed(seed)
@@ -1450,7 +1499,7 @@ def calculate_ela_curvate(
 
       wfunc = partial(_calculate_num_derivate, f, lower_bound, upper_bound, delta, eps, zero_tol)
       derivs = X.sample(N).apply(lambda x: wfunc(x.values), axis = 1)
-      derivs = np.array([x for x in derivs]).reshape(3, derivs.shape[0])
+      derivs = np.array([x for x in derivs]).T
       
       return {
             'ela_curv.grad_norm.min': np.nanmin(derivs[0]),
@@ -1493,6 +1542,7 @@ def calculate_ela_local(
       ela_local_optim_method: str = 'L-BFGS-B',
       ela_local_clust_method: str = 'single',
       seed: Optional[int] = None,
+      normalize: bool = False,
       **minimizer_kwargs) -> Dict[str, Union[int, float]]:
       """ELA Local Search features.
       Based on some randomly chosen points from the initial design, a pre-defined number of local searches (ela_local.local_searches) are executed.
@@ -1531,6 +1581,15 @@ def calculate_ela_local(
           Hierarchical clustering method to use, by default 'single'.
       seed : Optional[int], optional
           Seed for reproducability, by default None.
+      normalize : bool, optional
+          Whether the objective values are min-max normalized to [0, 1] before the features
+          are computed. This nullifies the bias of features which are not shift and scale
+          invariant, cf. Prager and Trautmann (2023), by default False.
+          ATTENTION: Normalization rescales the objective function which the local searches
+          optimize. Since the convergence criteria of the optimizer are absolute, it converges
+          slightly differently and thus finds a marginally different set of local optima.
+          Therefore, `basin_sizes.avg_best`, `basin_sizes.avg_non_best` and
+          `best2mean_contr.ratio` remain dependent on the scale of the objective values.
 
       Returns
       -------
@@ -1540,6 +1599,9 @@ def calculate_ela_local(
       """      
       start_time = time.monotonic()
       X, y = _validate_variable_types(X, y)
+      if normalize:
+            y, y_min, y_range = _normalize_objective_with_scale(y)
+            f = lambda x, _f = f: (_f(x) - y_min)/y_range
       lower_bound, upper_bound = _transform_bounds_to_canonical(dim, lower_bound, upper_bound)
       N = ela_local_local_searches_factor * dim
       if not minimize:
@@ -1565,9 +1627,9 @@ def calculate_ela_local(
       fes = np.array(fes)
 
       cl = linkage(x_opts, method = ela_local_clust_method)
-      nodes = _order_cluster_tree(cl)
-
-      heights = np.array([x.dist for x in nodes])
+      # Third column of the linkage matrix holds the merge distances, which is what
+      # the (private and meanwhile removed) scipy function _order_cluster_tree returned.
+      heights = cl[:, 2]
       c_assign = cut_tree(cl, height = np.quantile(heights, 0.1)).flatten()
       clust_sizes = np.array([(c_assign == x).sum()/len(np.unique(c_assign)) for x in np.unique(c_assign)])
       c_centers = []
