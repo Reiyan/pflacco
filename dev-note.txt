@@ -1,0 +1,17 @@
+Fixed Issues, reported by Shuhei Tanaka, Fukuchiyama University:
+1: grad_norm was never a gradient norm
+2: Array transformation scrambled the three feature columns
+
+Fixed Github Issues:
+#27: Refactor block calculation for cell mapping features
+#38: calculate_information_content selects deleted/duplicate rows
+#41: CITATION.cff
+#42: Pass seed into Sobol sequence generation
+#43 / #19: Objective normalization (defaults to False)
+
+Fixed Issues, reported by Claude:
+1: scipy.cluster.hierarchy._order_cluster_tree removed (not needed)
+2: np.product removed in numpy 2
+3: Positional access in _create_blocks
+4: Dead code in _calculate_num_derivate
+5: _create_blocks never validates its input
