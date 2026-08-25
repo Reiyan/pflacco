@@ -1,29 +1,36 @@
-name: Generate Linux test resources
+name: Generate test resources
 
 on:
   workflow_dispatch:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.12"]
+        include:
+          - os: ubuntu-latest
+            rsc: linux
+          - os: windows-latest
+            rsc: windows
 
     steps:
     - uses: actions/checkout@v4
-    - name: Set up Python ${{ matrix.python-version }}
+    - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: ${{ matrix.python-version }}
+        python-version: "3.12"
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         python -m pip install -r requirements.txt -r requirements_test.txt
-        python tests/generate_resources.py
-    - name: Generate Test Data
+    - name: Generate test resources
+      run: python tests/generate_resources.py
+    - name: Verify that the test suite passes with them
+      run: pytest
+    - name: Upload tests/resources/${{ matrix.rsc }}
       uses: actions/upload-artifact@v4
       with:
-        name: test_data
-        path: tests/resources/
+        name: test_data-${{ matrix.rsc }}
+        path: tests/resources/${{ matrix.rsc }}/
