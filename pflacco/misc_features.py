@@ -189,7 +189,7 @@ def calculate_fitness_distance_correlation(
       proportion_of_best: float = 0.1,
       minimize: bool = True,
       minkowski_p: int = 2,
-      normalize: bool = False) -> Dict[str, Union[int, float]]:
+      normalize: bool = True) -> Dict[str, Union[int, float]]:
       """Calculation of Fitness Distance Correlation features in accordance to [1] and [2].
       
       - fd_{correlation, cov}: Correlation/Covariance between the fitness values f_i and the respective distance d_i, where d_i is the distance in the decision space between the given observation x_i and the sampled x*
@@ -216,7 +216,7 @@ def calculate_fitness_distance_correlation(
       normalize : bool, optional
           Whether the objective values are min-max normalized to [0, 1] before the features
           are computed. This nullifies the bias of features which are not shift and scale
-          invariant, cf. Prager and Trautmann (2023), by default False.
+          invariant, cf. Prager and Trautmann (2023), by default True.
 
       Returns
       -------

@@ -345,7 +345,7 @@ def test_ela_curv_matches_analytical_sphere():
     f = lambda x: float(np.sum(np.asarray(x) ** 2))
     X = create_initial_sample(2, 200, lower_bound = -5.12, upper_bound = 5.12, seed = 42)
     y = X.apply(lambda x: f(x.values), axis = 1)
-    features = calculate_ela_curvate(X, y, f, 2, seed = 42)
+    features = calculate_ela_curvate(X, y, f, 2, seed = 42, normalize = False)
 
     assert features['ela_curv.grad_norm.max'] <= 14.49
     assert np.isclose(features['ela_curv.hessian_cond.max'], 1)

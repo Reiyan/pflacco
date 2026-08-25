@@ -48,7 +48,7 @@ def _calculate_num_derivate(f, x):
 def calculate_ela_meta(
       X: Union[pd.DataFrame, np.ndarray, List[List[float]]],
       y: Union[pd.Series, np.ndarray, List[float]],
-      normalize: bool = False) -> Dict[str, Union[int, float]]:
+      normalize: bool = True) -> Dict[str, Union[int, float]]:
       """ELA Meta features.
       Given an initial design, linear and quadratic models of the form objective ~ features are created.
       Both versions are created with and without simple interactions (e.g., x1:x2). Based on those models, the following features are computed:
@@ -68,7 +68,7 @@ def calculate_ela_meta(
       normalize : bool, optional
           Whether the objective values are min-max normalized to [0, 1] before the features
           are computed. This nullifies the bias of features which are not shift and scale
-          invariant, cf. Prager and Trautmann (2023), by default False.
+          invariant, cf. Prager and Trautmann (2023), by default True.
 
       Returns
       -------
@@ -144,7 +144,7 @@ def calculate_pca(
       prop_cor_x: float = 0.9,
       prop_cov_init: float = 0.9,
       prop_cor_init: float = 0.9,
-      normalize: bool = False) -> Dict[str, Union[int, float]]:
+      normalize: bool = True) -> Dict[str, Union[int, float]]:
       """Principal component (analysis) features.
       
       - expl_var.{cov, cor}_{x, init}: proportion of the explained variance when applying PCA to the covariance / correlation matrix of the decision space (x) or the entire initial design (init)
@@ -172,7 +172,7 @@ def calculate_pca(
       normalize : bool, optional
           Whether the objective values are min-max normalized to [0, 1] before the features
           are computed. This nullifies the bias of features which are not shift and scale
-          invariant, cf. Prager and Trautmann (2023), by default False.
+          invariant, cf. Prager and Trautmann (2023), by default True.
 
       Returns
       -------
@@ -456,7 +456,7 @@ def calculate_information_content(
       ic_settling_sensitivity: float = 0.05,
       ic_info_sensitivity: float = 0.5,
       seed: Optional[int] = None,
-      normalize: bool = False) -> Dict[str, Union[int, float]]:
+      normalize: bool = True) -> Dict[str, Union[int, float]]:
       """Information Content features.
       Computes features based on the Information Content of Fitness Sequences (ICoFiS) approach [1].
       In this approach, the information content of a continuous landscape, i.e. smoothness, ruggedness, or neutrality, are quantified.
@@ -495,7 +495,7 @@ def calculate_information_content(
       normalize : bool, optional
           Whether the objective values are min-max normalized to [0, 1] before the features
           are computed. This nullifies the bias of features which are not shift and scale
-          invariant, cf. Prager and Trautmann (2023), by default False.
+          invariant, cf. Prager and Trautmann (2023), by default True.
 
       Returns
       -------
@@ -758,7 +758,7 @@ def calculate_limo(
       upper_bound: Union[List[float], float],
       blocks: Optional[Union[List[int], np.ndarray, int]] = None,
       force: bool = False,
-      normalize: bool = False) -> Dict[str, Optional[Union[int, float]]]:
+      normalize: bool = True) -> Dict[str, Optional[Union[int, float]]]:
       """Linear Model features.
       Linear models are computed per cell, provided the decision space is divided into a grid of cells. Each one of the models has the form objective ~ features.
       
@@ -790,7 +790,7 @@ def calculate_limo(
       normalize : bool, optional
           Whether the objective values are min-max normalized to [0, 1] before the features
           are computed. This nullifies the bias of features which are not shift and scale
-          invariant, cf. Prager and Trautmann (2023), by default False.
+          invariant, cf. Prager and Trautmann (2023), by default True.
 
       Returns
       -------
@@ -1240,7 +1240,7 @@ def calculate_ela_conv(
       ela_conv_nsample: int = 1000,
       ela_conv_threshold: float = 1e-10,
       seed: Optional[int] = None,
-      normalize: bool = False) -> Dict[str, Union[int, float]]:
+      normalize: bool = True) -> Dict[str, Union[int, float]]:
       """ELA Convexity features.
       Two observations are chosen randomly from the initial design. Then, a linear (convex) combination of those observations is calculated based on a random weight from [0, 1].
       The corresponding objective value will be compared to the linear combination of the objectives from the two original observations.
@@ -1268,7 +1268,7 @@ def calculate_ela_conv(
       normalize : bool, optional
           Whether the objective values are min-max normalized to [0, 1] before the features
           are computed. This nullifies the bias of features which are not shift and scale
-          invariant, cf. Prager and Trautmann (2023), by default False.
+          invariant, cf. Prager and Trautmann (2023), by default True.
 
       Returns
       -------
@@ -1417,7 +1417,7 @@ def calculate_ela_curvate(
       dim: int,
       sample_size_factor: int = 100,
       seed: Optional[int] = None,
-      normalize: bool = False) -> Dict[str, Union[int, float]]:
+      normalize: bool = True) -> Dict[str, Union[int, float]]:
       """ELA Curvature features.
 
       Given a feature object, curv.sample_size samples (per default 100 * d with d being the number of features) are randomly chosen.
@@ -1445,7 +1445,7 @@ def calculate_ela_curvate(
       normalize : bool, optional
           Whether the objective values are min-max normalized to [0, 1] before the features
           are computed. This nullifies the bias of features which are not shift and scale
-          invariant, cf. Prager and Trautmann (2023), by default False.
+          invariant, cf. Prager and Trautmann (2023), by default True.
 
       Returns
       -------
@@ -1519,7 +1519,7 @@ def calculate_ela_local(
       ela_local_optim_method: str = 'L-BFGS-B',
       ela_local_clust_method: str = 'single',
       seed: Optional[int] = None,
-      normalize: bool = False,
+      normalize: bool = True,
       **minimizer_kwargs) -> Dict[str, Union[int, float]]:
       """ELA Local Search features.
       Based on some randomly chosen points from the initial design, a pre-defined number of local searches (ela_local.local_searches) are executed.
@@ -1561,7 +1561,7 @@ def calculate_ela_local(
       normalize : bool, optional
           Whether the objective values are min-max normalized to [0, 1] before the features
           are computed. This nullifies the bias of features which are not shift and scale
-          invariant, cf. Prager and Trautmann (2023), by default False.
+          invariant, cf. Prager and Trautmann (2023), by default True.
           ATTENTION: Normalization rescales the objective function which the local searches
           optimize. Since the convergence criteria of the optimizer are absolute, it converges
           slightly differently and thus finds a marginally different set of local optima.
