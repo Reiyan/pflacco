@@ -2,6 +2,8 @@ import os
 import pandas as pd
 import pytest
 
+from pandas.testing import assert_frame_equal
+
 RSC = os.path.join('tests', 'resources')
 
 def _read_fixture(path):
@@ -10,6 +12,13 @@ def _read_fixture(path):
     # string-dtype one for freshly built frames. Rebuild it to match the running pandas.
     X.columns = pd.Index(list(X.columns))
     return X
+
+def assert_features_equal(result, expected):
+    # Feature values drift in the last digits between library versions, e.g. the
+    # condition number of a numerically singular Hessian. assert_frame_equal
+    # defaults to rtol=1e-5, which is tighter than that drift; 1e-3 still catches
+    # every real regression, the smallest of which changed values several fold.
+    assert assert_frame_equal(result, expected, rtol = 1e-3) is None
 
 @pytest.fixture(scope="package")
 def x_samples():

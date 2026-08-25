@@ -7,7 +7,7 @@ import platform
 from ioh import get_problem
 from pandas.testing import assert_frame_equal
 
-from .conftest import _read_fixture
+from .conftest import _read_fixture, assert_features_equal
 from pflacco.classical_ela_features import *
 from pflacco.sampling import create_initial_sample
 
@@ -48,7 +48,7 @@ def test_calculate_ela_meta(x_samples, feature_values):
             result.append(data)
     result = pd.concat(result).reset_index(drop = True)
     colnames = result.columns[~result.columns.str.contains('costs_runtime')]
-    assert (assert_frame_equal(result[colnames], feature_values[colnames]) is None)
+    assert_features_equal(result[colnames], feature_values[colnames])
 
 def test_calculate_ela_distr(x_samples, feature_values):
     dim = x_samples.shape[1] - 1
@@ -65,7 +65,7 @@ def test_calculate_ela_distr(x_samples, feature_values):
             result.append(data)
     result = pd.concat(result).reset_index(drop = True)
     colnames = result.columns[~result.columns.str.contains('costs_runtime')]
-    assert (assert_frame_equal(result[colnames], feature_values[colnames]) is None)
+    assert_features_equal(result[colnames], feature_values[colnames])
 
 def test_calculate_ela_level(x_samples, feature_values):
     result = []
@@ -81,7 +81,7 @@ def test_calculate_ela_level(x_samples, feature_values):
             result.append(data)
     result = pd.concat(result).reset_index(drop = True)
     colnames = result.columns[~result.columns.str.contains('costs_runtime')]
-    assert (assert_frame_equal(result[colnames], feature_values[colnames]) is None)
+    assert_features_equal(result[colnames], feature_values[colnames])
 
 def test_calculate_nbc(x_samples, feature_values):
     result = []
@@ -97,7 +97,7 @@ def test_calculate_nbc(x_samples, feature_values):
             result.append(data)
     result = pd.concat(result).reset_index(drop = True)
     colnames = result.columns[~result.columns.str.contains('costs_runtime')]
-    assert (assert_frame_equal(result[colnames], feature_values[colnames]) is None)
+    assert_features_equal(result[colnames], feature_values[colnames])
 
 def test_calculate_disp(x_samples, feature_values):
     result = []
@@ -113,7 +113,7 @@ def test_calculate_disp(x_samples, feature_values):
             result.append(data)
     result = pd.concat(result).reset_index(drop = True)
     colnames = result.columns[~result.columns.str.contains('costs_runtime')]
-    assert (assert_frame_equal(result[colnames], feature_values[colnames]) is None)
+    assert_features_equal(result[colnames], feature_values[colnames])
 
 def test_calculate_pca(x_samples, feature_values):
     result = []
@@ -129,7 +129,7 @@ def test_calculate_pca(x_samples, feature_values):
             result.append(data)
     result = pd.concat(result).reset_index(drop = True)
     colnames = result.columns[~result.columns.str.contains('costs_runtime')]
-    assert (assert_frame_equal(result[colnames], feature_values[colnames]) is None)
+    assert_features_equal(result[colnames], feature_values[colnames])
 
 ########################################################
 # Stochastic Features
@@ -147,7 +147,7 @@ def test_calculate_ela_local(x_samples, feature_values):
             result.append(data)
     result = pd.concat(result).reset_index(drop = True)
     colnames = result.columns[~result.columns.str.contains('costs_runtime')]
-    assert (assert_frame_equal(result[colnames], feature_values[colnames]) is None)
+    assert_features_equal(result[colnames], feature_values[colnames])
 
 def test_calculate_ela_curvate(x_samples, feature_values):
     result = []
@@ -163,7 +163,7 @@ def test_calculate_ela_curvate(x_samples, feature_values):
             result.append(data)
     result = pd.concat(result).reset_index(drop = True)
     colnames = result.columns[~result.columns.str.contains('costs_runtime')]
-    assert (assert_frame_equal(result[colnames], feature_values[colnames]) is None)
+    assert_features_equal(result[colnames], feature_values[colnames])
 
 def test_calculate_ela_conv(x_samples, feature_values):
     result = []
@@ -179,7 +179,7 @@ def test_calculate_ela_conv(x_samples, feature_values):
             result.append(data)
     result = pd.concat(result).reset_index(drop = True)
     colnames = result.columns[~result.columns.str.contains('costs_runtime')]
-    assert (assert_frame_equal(result[colnames], feature_values[colnames]) is None)
+    assert_features_equal(result[colnames], feature_values[colnames])
 
 def test_calculate_information_content(x_samples, feature_values):
     result = []
@@ -195,7 +195,7 @@ def test_calculate_information_content(x_samples, feature_values):
             result.append(data)
     result = pd.concat(result).reset_index(drop = True)
     colnames = result.columns[~result.columns.str.contains('costs_runtime')]
-    assert (assert_frame_equal(result[colnames], feature_values[colnames]) is None)
+    assert_features_equal(result[colnames], feature_values[colnames])
 
 ########################################################
 ## Cell Mapping Features
@@ -216,7 +216,7 @@ def test_calculate_cm_angle(x_samples, cm_feature_values):
             result.append(data)
     result = pd.concat(result).reset_index(drop = True)
     colnames = result.columns[~result.columns.str.contains('costs_runtime')]
-    assert (assert_frame_equal(result[colnames], cm_feature_values[colnames]) is None)
+    assert_features_equal(result[colnames], cm_feature_values[colnames])
 
 def test_calculate_cm_conv(x_samples, cm_feature_values):
     result = []
@@ -235,7 +235,7 @@ def test_calculate_cm_conv(x_samples, cm_feature_values):
             result.append(data)
     result = pd.concat(result).reset_index(drop = True)
     colnames = result.columns[~result.columns.str.contains('costs_runtime')]
-    assert (assert_frame_equal(result[colnames], cm_feature_values[colnames]) is None)
+    assert_features_equal(result[colnames], cm_feature_values[colnames])
 
 def test_calculate_cm_grad(x_samples, cm_feature_values):
     result = []
@@ -254,7 +254,7 @@ def test_calculate_cm_grad(x_samples, cm_feature_values):
             result.append(data)
     result = pd.concat(result).reset_index(drop = True)
     colnames = result.columns[~result.columns.str.contains('costs_runtime')]
-    assert (assert_frame_equal(result[colnames], cm_feature_values[colnames]) is None)
+    assert_features_equal(result[colnames], cm_feature_values[colnames])
 
 def test_calculate_limo(x_samples, cm_feature_values):
     result = []
@@ -273,7 +273,7 @@ def test_calculate_limo(x_samples, cm_feature_values):
             result.append(data)
     result = pd.concat(result).reset_index(drop = True)
     colnames = result.columns[~result.columns.str.contains('costs_runtime')]
-    assert (assert_frame_equal(result[colnames], cm_feature_values[colnames]) is None)
+    assert_features_equal(result[colnames], cm_feature_values[colnames])
 
 def test_block_value_prerequisite(x_samples):
     with pytest.raises(ValueError, match='The provided value for "block" is too large, resulting in less than 3 observations per cell.'):
