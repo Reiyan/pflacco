@@ -162,7 +162,18 @@ def test_calculate_ela_curvate(x_samples, feature_values):
             data['dim'] = dim
             result.append(data)
     result = pd.concat(result).reset_index(drop = True)
-    colnames = result.columns[~result.columns.str.contains('costs_runtime')]
+    # The hessian_cond aggregations are excluded from the value comparison. On the
+    # BBOB functions whose Hessian is numerically singular at a sample point the
+    # condition number reaches 1e27, i.e. it is 1/eps noise rather than a landscape
+    # property, and every aggregation is contaminated by it: between numpy 2.4.6 /
+    # scipy 1.17.1 and numpy 2.5.2 / scipy 1.18.1, mean, max and sd differ by a
+    # factor of two and even the quantiles by up to 9 percent. The grad_norm and
+    # grad_scale columns of the same feature set agree to 1e-15 and stay in the
+    # comparison. Even hessian_cond.nas moves, because whether a point counts as
+    # degenerate is decided by eig.min() > 0, exactly at the boundary.
+    unstable = r'ela_curv\.hessian_cond\.'
+    colnames = result.columns[~result.columns.str.contains('costs_runtime') &
+                              ~result.columns.str.match(unstable)]
     assert_features_equal(result[colnames], feature_values[colnames])
 
 def test_calculate_ela_conv(x_samples, feature_values):
