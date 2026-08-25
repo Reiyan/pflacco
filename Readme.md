@@ -36,7 +36,7 @@ Generally speaking, this is definitely possible. However, to the best of my know
 Some CEC benchmarks have an unofficial Python wrapper (which is not kept up to date) like [CEC2017](https://github.com/lacerdamarcelo/cec17_python). These require additional compiling steps to run any of the functions.
 
 ## Prerequisites
-For a stable (and tested) outcome, pflacco requires at least [Python>=3.8](https://www.python.org/downloads/release/python-364/)
+For a stable (and tested) outcome, pflacco requires at least [Python>=3.10](https://www.python.org/downloads/)
 
 ## Setup
 Easy as it usually is in Python:

@@ -17,6 +17,7 @@ setuptools.setup(
      install_requires=required,
      url="https://pypi.org/project/pflacco/",
      packages=setuptools.find_packages(),
+     python_requires='>=3.10',
      classifiers=[
          "Programming Language :: Python :: 3",
          "License :: OSI Approved :: MIT License",

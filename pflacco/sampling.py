@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-from pyDOE import lhs
+from pydoe import lhs
 from scipy.stats import levy
 from scipy.stats.qmc import Sobol
 from scipy.optimize import minimize as scipy_minimize
@@ -86,7 +86,9 @@ def create_initial_sample(
             np.random.seed(seed)
 
       if sample_type == 'lhs':
-            X = lhs(dim, samples = n)
+            # pydoe draws from its own Generator and ignores the global numpy seed,
+            # so the seed has to be passed explicitly to stay reproducible.
+            X = lhs(dim, samples = n, seed = seed)
       elif sample_type == 'sobol':
             sampler = Sobol(d = dim, seed = seed)
             X = sampler.random(n)
