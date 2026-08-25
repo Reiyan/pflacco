@@ -1,5 +1,10 @@
+import os
 import sys
-sys.path.append("../pflacco")
+
+# Run from anywhere: put the repository root, i.e. the parent of tests/, on the
+# path. The previous "../pflacco" only resolved because the checkout happens to
+# sit in a directory of the same name.
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from pflacco.classical_ela_features import *
 from pflacco.misc_features import *
