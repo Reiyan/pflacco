@@ -23,14 +23,12 @@ def test_sobol_sample():
     assert sample.equals(expected)
 
 def test_random_sample():
-    np.random.seed(50)
-    sample = create_initial_sample(5, sample_type = 'random')
+    sample = create_initial_sample(5, sample_type = 'random', seed = 50)
     expected = pd.read_pickle(os.path.join(RSC, f'random_sample.pkl'))
     assert sample.equals(expected)
 
 def test_random_mixed_search_space_sample(x_mixed_search_space_sample):
-    np.random.seed(50)
-    sample = create_initial_sample(3, sample_coefficient= 3, sample_type = 'random', categorical_values = ['cont', 'int', ['val1', 'val2', 'val3']])
+    sample = create_initial_sample(3, sample_coefficient= 3, sample_type = 'random', categorical_values = ['cont', 'int', ['val1', 'val2', 'val3']], seed = 50)
     assert sample.equals(x_mixed_search_space_sample)
 
 def test_random_mixed_search_space_sample_not_implemented():
@@ -43,3 +41,15 @@ def test_sobol_sample_honours_seed():
     kwargs = dict(sample_type = 'sobol')
     assert create_initial_sample(2, 8, seed = 1, **kwargs).equals(create_initial_sample(2, 8, seed = 1, **kwargs))
     assert not create_initial_sample(2, 8, seed = 1, **kwargs).equals(create_initial_sample(2, 8, seed = 2, **kwargs))
+
+# https://github.com/Reiyan/pflacco/issues/31
+@pytest.mark.parametrize('sample_type', ['lhs', 'sobol', 'random'])
+def test_seed_accepts_an_int_or_a_generator(sample_type):
+    kwargs = dict(dim = 2, n = 8, sample_type = sample_type)
+    # the same int reproduces, a different one does not
+    assert create_initial_sample(seed = 1, **kwargs).equals(create_initial_sample(seed = 1, **kwargs))
+    assert not create_initial_sample(seed = 1, **kwargs).equals(create_initial_sample(seed = 2, **kwargs))
+    # a Generator is accepted in place of the int and behaves identically
+    assert create_initial_sample(seed = np.random.default_rng(1), **kwargs).equals(
+           create_initial_sample(seed = np.random.default_rng(1), **kwargs))
+

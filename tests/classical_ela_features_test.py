@@ -390,3 +390,25 @@ def test_normalize_makes_features_shift_and_scale_invariant(feature_set, x_sampl
         if 'costs' in key:
             continue
         assert np.isclose(original[key], shifted[key], rtol = 1e-6, equal_nan = True), key
+
+# https://github.com/Reiyan/pflacco/issues/31
+def test_features_are_reproducible_from_a_seed(x_samples):
+    dim = 2
+    X = x_samples.iloc[:(dim*50), :dim]
+    f = get_problem(1, 1, dim)
+    y = X.apply(lambda x: f(x.values), axis = 1)
+
+    calls = [lambda s: calculate_ela_conv(X, y, f, seed = s),
+             lambda s: calculate_ela_curvate(X, y, f, dim, seed = s),
+             lambda s: calculate_information_content(X, y, seed = s),
+             lambda s: calculate_nbc(X, y, seed = s)]
+    # An int is a seed and reproduces. A Generator is a stream: it is handed over
+    # and consumed, so two calls need two fresh ones to be comparable.
+    for make_seed in (lambda: 7, lambda: np.random.default_rng(7)):
+        for call in calls:
+            a, b = call(make_seed()), call(make_seed())
+            for key in a:
+                if 'costs' in key:
+                    continue
+                assert np.isclose(a[key], b[key], equal_nan = True), key
+

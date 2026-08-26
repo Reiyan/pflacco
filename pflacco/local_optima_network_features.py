@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-import random
 import scipy.optimize as opt
 
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
@@ -145,9 +144,7 @@ def compute_local_optima_network(
     edges = []
     last = 0
 
-    if seed is not None:
-        np.random.seed(seed)
-        random.seed(seed)
+    rng = np.random.default_rng(seed)
 
     if minimizer_kwargs is None:
         minimizer_kwargs = {
@@ -161,8 +158,8 @@ def compute_local_optima_network(
     minimizer_kwargs['bounds'] = list(zip(lower_bound, upper_bound))
     
     for _ in range(basin_hopping_iteration):
-        x0 = np.random.uniform(lower_bound, upper_bound, dim)
-        opt.basinhopping(f, x0, T=0.0, minimizer_kwargs=minimizer_kwargs, stepsize = stepsize, callback=_minfound, niter=stopping_threshold)
+        x0 = rng.uniform(lower_bound, upper_bound, dim)
+        opt.basinhopping(f, x0, T=0.0, minimizer_kwargs=minimizer_kwargs, stepsize = stepsize, callback=_minfound, niter=stopping_threshold, seed = rng)
         restart = True
 
     nodes = pd.DataFrame(np.array([np.array([x, nodes[x][0], 1]) for x in range(len(nodes))]), columns = ['id', 'fval', 'neutrality'])

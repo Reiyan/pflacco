@@ -248,7 +248,8 @@ def calculate_nbc(
       y: Union[pd.Series, np.ndarray, List[float]],
       fast_k: float = 0.05,
       dist_tie_breaker: str = 'sample',
-      minimize: bool = True) -> Dict[str, Union[int, float]]:
+      minimize: bool = True,
+      seed: Optional[Union[int, np.random.Generator]] = None) -> Dict[str, Union[int, float]]:
       """Nearest Better Clustering features.
       Computes features based on the comparison of nearest neighbour and nearest better neighbour, i.e., the nearest neighbor with a better performance / objective value value.
       
@@ -281,6 +282,9 @@ def calculate_nbc(
       """      
       start_time = time.monotonic()
       X, y = _validate_variable_types(X, y)
+      # Only consumed by the 'sample' tie breaker below, which used to draw from
+      # the global RNG with no way of controlling it.
+      rng = np.random.default_rng(seed)
       y = y.to_numpy()
 
       if fast_k < 1:
@@ -325,7 +329,7 @@ def calculate_nbc(
                         # If ties are present, they can be resolved randomly or by taking the first or last index.
                         if len(i) > 1:
                               if dist_tie_breaker == 'sample':
-                                    i = np.random.choice(i)
+                                    i = rng.choice(i)
                               elif dist_tie_breaker == 'first':
                                     i = i[0]
                               elif dist_tie_breaker == 'last':
@@ -455,7 +459,7 @@ def calculate_information_content(
       ic_epsilon: List[float] = np.insert(10 ** np.linspace(start = -5, stop = 15, num = 1000), 0, 0),
       ic_settling_sensitivity: float = 0.05,
       ic_info_sensitivity: float = 0.5,
-      seed: Optional[int] = None,
+      seed: Optional[Union[int, np.random.Generator]] = None,
       normalize: bool = True) -> Dict[str, Union[int, float]]:
       """Information Content features.
       Computes features based on the Information Content of Fitness Sequences (ICoFiS) approach [1].
@@ -558,17 +562,16 @@ def calculate_information_content(
                   v = v[~index]
 
             
-      if seed is not None and isinstance(seed, int):
-            np.random.seed(seed)
+      rng = np.random.default_rng(seed)
 
       # dist based on ic_sorting
       if ic_sorting == 'random':
-            permutation = np.random.choice(range(X.shape[0]), size = X.shape[0], replace = False)
+            permutation = rng.choice(range(X.shape[0]), size = X.shape[0], replace = False)
             X = X.iloc[permutation].reset_index(drop = True)
             d = [np.sqrt((X.iloc[idx] - X.iloc[idx + 1]).pow(2).sum()) for idx in range(X.shape[0] - 1)]
       else:
             if ic_nn_start is None:
-                  ic_nn_start = np.random.choice(range(X.shape[0]), size = 1)[0]
+                  ic_nn_start = rng.choice(range(X.shape[0]), size = 1)[0]
             if ic_nn_neighborhood < 1 and ic_nn_neighborhood > X.shape[0]:
                   raise Exception(f'[{ic_nn_neighborhood}] is an invalid option for the NN neighborhood, because the sample only covers 1 to {X.shape[0]} observations.')
             nbrs = NearestNeighbors(n_neighbors = min(ic_nn_neighborhood, X.shape[0]), algorithm='kd_tree').fit(X)
@@ -1239,7 +1242,7 @@ def calculate_ela_conv(
       f: Callable[[List[float]], float],
       ela_conv_nsample: int = 1000,
       ela_conv_threshold: float = 1e-10,
-      seed: Optional[int] = None,
+      seed: Optional[Union[int, np.random.Generator]] = None,
       normalize: bool = True) -> Dict[str, Union[int, float]]:
       """ELA Convexity features.
       Two observations are chosen randomly from the initial design. Then, a linear (convex) combination of those observations is calculated based on a random weight from [0, 1].
@@ -1281,14 +1284,13 @@ def calculate_ela_conv(
             y, y_min, y_range = _normalize_objective_with_scale(y)
             f = lambda x, _f = f: (_f(x) - y_min)/y_range
 
-      if seed is not None:
-            np.random.seed(seed)
+      rng = np.random.default_rng(seed)
 
       delta = []
       nfev = 0
       for _ in range(ela_conv_nsample):
-            i = np.random.randint(low = 0, high = X.shape[0], size = 2)
-            wt = np.random.uniform(size = 1)[0]
+            i = rng.integers(low = 0, high = X.shape[0], size = 2)
+            wt = rng.uniform(size = 1)[0]
             wt = np.array([wt, 1 - wt])
             xn = np.matmul(wt, X.iloc[i].to_numpy())
             delta.append(f(xn) - np.matmul(y.iloc[i], wt))
@@ -1416,7 +1418,7 @@ def calculate_ela_curvate(
       f: Callable[[List[float]], float],
       dim: int,
       sample_size_factor: int = 100,
-      seed: Optional[int] = None,
+      seed: Optional[Union[int, np.random.Generator]] = None,
       normalize: bool = True) -> Dict[str, Union[int, float]]:
       """ELA Curvature features.
 
@@ -1459,8 +1461,7 @@ def calculate_ela_curvate(
       if normalize:
             y, y_min, y_range = _normalize_objective_with_scale(y)
             f = lambda x, _f = f: (_f(x) - y_min)/y_range
-      if seed is not None:
-            np.random.seed(seed)
+      rng = np.random.default_rng(seed)
 
       N = sample_size_factor * dim
       if X.shape[0] < N:
@@ -1475,7 +1476,7 @@ def calculate_ela_curvate(
       f = partial(decorator, original_f)
 
       wfunc = partial(_calculate_num_derivate, f)
-      derivs = X.sample(N).apply(lambda x: wfunc(x.values), axis = 1)
+      derivs = X.sample(N, random_state = rng).apply(lambda x: wfunc(x.values), axis = 1)
       derivs = np.array([x for x in derivs]).T
       
       return {
@@ -1518,7 +1519,7 @@ def calculate_ela_local(
       ela_local_local_searches_factor: int = 50,
       ela_local_optim_method: str = 'L-BFGS-B',
       ela_local_clust_method: str = 'single',
-      seed: Optional[int] = None,
+      seed: Optional[Union[int, np.random.Generator]] = None,
       normalize: bool = True,
       **minimizer_kwargs) -> Dict[str, Union[int, float]]:
       """ELA Local Search features.
@@ -1588,14 +1589,13 @@ def calculate_ela_local(
 
       if X.shape[0] < N:
             raise ValueError(f'X contains less then the required {N} (= dim * ela_local_local_searches_factor) starting points')
-      if seed is not None:
-            np.random.seed(seed)
-      
+      rng = np.random.default_rng(seed)
+
       bounds = list(zip(lower_bound, upper_bound))
       x_opts = []
       fes = []
 
-      for _, row in X.sample(N, replace = False).iterrows():
+      for _, row in X.sample(N, replace = False, random_state = rng).iterrows():
             opt_result = scipy_minimize(f, row.values, method = ela_local_optim_method, bounds = bounds, **minimizer_kwargs)
             x_opts.append(opt_result.x)
             fes.append(opt_result.nfev)

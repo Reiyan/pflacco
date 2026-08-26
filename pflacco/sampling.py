@@ -17,7 +17,7 @@ def create_initial_sample(
       upper_bound: Union[List[float], float] = 1,
       sample_type: str = 'lhs',
       categorical_values: Optional[List[Union[str, List[str]]]] = None,
-      seed: Optional[int] = None) -> pd.DataFrame:
+      seed: Optional[Union[int, np.random.Generator]] = None) -> pd.DataFrame:
       """Sampling of the decision space.
 
       Parameters
@@ -82,27 +82,26 @@ def create_initial_sample(
             cat_idx = [x for x in range(len(categorical_values)) if type(categorical_values[x]) is list]
             int_idx = [x for x in range(len(categorical_values)) if categorical_values[x] == 'int']
 
-      if seed is not None:
-            np.random.seed(seed)
+      # np.random.default_rng accepts an int, an existing Generator, which it
+      # passes through unchanged, or None for a fresh unpredictable one.
+      rng = np.random.default_rng(seed)
 
       if sample_type == 'lhs':
-            # pydoe draws from its own Generator and ignores the global numpy seed,
-            # so the seed has to be passed explicitly to stay reproducible.
-            X = lhs(dim, samples = n, seed = seed)
+            X = lhs(dim, samples = n, seed = rng)
       elif sample_type == 'sobol':
-            sampler = Sobol(d = dim, seed = seed)
+            sampler = Sobol(d = dim, seed = rng)
             X = sampler.random(n)
       else:
-            X = np.random.rand(n, dim)
+            X = rng.random((n, dim))
       
       if categorical_values is None:
             X = X * (upper_bound - lower_bound) + lower_bound
       else:
             X = X.transpose().tolist()
             for i in cat_idx:
-                  X[i] = np.random.choice(categorical_values[i], n) 
+                  X[i] = rng.choice(categorical_values[i], n)
             for i in int_idx:
-                  X[i] = np.random.randint(lower_bound[i], upper_bound[i] + 1, n)
+                  X[i] = rng.integers(lower_bound[i], upper_bound[i] + 1, n)
             X = np.array(X).transpose()
             
       colnames = ['x' + str(x) for x in range(dim)]
@@ -115,8 +114,7 @@ def _create_local_search_sample(f, dim, lower_bound, upper_bound, n_runs = 100, 
     if not minimize:
         original_f = f
         f = lambda x: -1 * original_f(x)
-    if seed is not None:
-        np.random.seed(seed)
+    rng = np.random.default_rng(seed)
 
     minimizer_kwargs = {
         'maxfun': budget_factor_per_run*dim,
@@ -127,7 +125,7 @@ def _create_local_search_sample(f, dim, lower_bound, upper_bound, n_runs = 100, 
     result = []
     nfval = 0
     for _ in range(n_runs):
-        x0 = np.random.uniform(low = lower_bound, high = upper_bound, size = dim)
+        x0 = rng.uniform(low = lower_bound, high = upper_bound, size = dim)
         opt_result = scipy_minimize(f, x0, method = method, bounds = bounds, options = minimizer_kwargs)
         result.append(np.append(opt_result.x, [opt_result.fun]))
         nfval += opt_result.nfev
@@ -135,10 +133,9 @@ def _create_local_search_sample(f, dim, lower_bound, upper_bound, n_runs = 100, 
     return np.array(result), nfval
 
 def _levy_random_walk(x, loc = 0, scale = 10**-3, seed = None):
-      if seed is not None:
-            np.random.seed(seed)
-      vec = np.random.normal(0, 1, len(x))
+      rng = np.random.default_rng(seed)
+      vec = rng.normal(0, 1, len(x))
       norm_vec = vec/(np.sqrt((vec ** 2).sum()))
-      step_size = levy.rvs(size = 1, loc = loc, scale = scale)
+      step_size = levy.rvs(size = 1, loc = loc, scale = scale, random_state = rng)
 
       return x + step_size * norm_vec 

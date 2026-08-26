@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-import random
 import time
 import warnings
 
@@ -22,7 +21,7 @@ def calculate_hill_climbing_features(
       budget_factor_per_run: int = 1000,
       method: str = 'L-BFGS-B',
       minimize: bool = True,
-      seed: Optional[int] = None,
+      seed: Optional[Union[int, np.random.Generator]] = None,
       minkowski_p: int = 2) -> Dict[str, Union[int, float]]:
       """Calculation of a Hill Climbing features in accordance to [1].
       The feature set is calculated on a number of hill climbing runs.
@@ -98,7 +97,7 @@ def calculate_gradient_features(
       upper_bound: Union[List[float], float], 
       step_size: float = None, 
       budget_factor_per_dim: int = 100,
-      seed: Optional[int] = None) -> Dict[str, Union[int, float]]:
+      seed: Optional[Union[int, np.random.Generator]] = None) -> Dict[str, Union[int, float]]:
       """Calculation of a Gradient features in accordance to [1].
       A random walk is performed the gradient of the fitness space between each consecutive step is estimated.
 
@@ -138,13 +137,12 @@ def calculate_gradient_features(
       start_time = time.monotonic()
       lower_bound, upper_bound = _transform_bounds_to_canonical(dim, lower_bound, upper_bound)
 
-      if seed is not None:
-            np.random.seed(seed)
+      rng = np.random.default_rng(seed)
 
       if step_size is None:
             step_size = (upper_bound.min() - lower_bound.min())/20
 
-      dd = np.random.choice([0, 1], size = dim)
+      dd = rng.choice([0, 1], size = dim)
       bounds = list(zip(lower_bound, upper_bound))
       x = np.array([bounds[x][dd[x]] for x in range(dim)], dtype = 'float64')
       nfev = 1
@@ -152,7 +150,7 @@ def calculate_gradient_features(
       signs = np.array([1 if x == 0 else -1 for x in dd])
       result = [np.append(x, fval)]
       for i in range(budget_factor_per_dim * dim - 1):
-            cd = np.random.choice(range(dim))
+            cd = rng.choice(range(dim))
             if not (x[cd] + signs[cd]*step_size <= bounds[cd][1] and x[cd] + signs[cd]*step_size >= bounds[cd][0]):
                   signs[cd] = signs[cd] * -1
             x[cd] = x[cd] + signs[cd]*step_size
@@ -285,7 +283,7 @@ def calculate_length_scales_features(
       lower_bound: Union[List[float], float],
       upper_bound: Union[List[float], float],
       budget_factor_per_dim: int = 100, 
-      seed: Optional[int] = None,
+      seed: Optional[Union[int, np.random.Generator]] = None,
       minimize: bool = True,
       sample_size_from_kde: int = 500) -> Dict[str, Union[int, float]]:
       """Calculation of Length-Scale features in accordance to [1].
@@ -328,17 +326,18 @@ def calculate_length_scales_features(
       start_time = time.monotonic()
       lower_bound, upper_bound = _transform_bounds_to_canonical(dim, lower_bound, upper_bound)
 
-      if seed is not None:
-            np.random.seed(seed)
-            random.seed(seed)
+      rng = np.random.default_rng(seed)
 
       bounds = list(zip(lower_bound, upper_bound))
 
-      x = np.random.uniform(lower_bound, upper_bound, dim)
+      x = rng.uniform(lower_bound, upper_bound, dim)
       result = []
       nfev = 0
       for _ in range(budget_factor_per_dim * (dim ** 2)):
-            x = _levy_random_walk(x, seed = seed)
+            # The Generator is handed over, not the seed. Passing the seed
+            # re-created the same stream on every iteration, so each step of the
+            # walk had the identical direction and length.
+            x = _levy_random_walk(x, seed = rng)
             x = np.array([np.clip(x[i], bounds[i][0], bounds[i][1]) for i in range(len(x))])
             fval = f(x)
             nfev += 1
@@ -351,7 +350,7 @@ def calculate_length_scales_features(
 
       if np.cov(r) != np.inf or np.cov(r) != np.nan:
         kernel = gaussian_kde(r)
-        sample = np.random.uniform(low=r.min(), high=r.max(), size = sample_size_from_kde)
+        sample = rng.uniform(low=r.min(), high=r.max(), size = sample_size_from_kde)
         prob = kernel.pdf(sample)
         h_r = entropy(prob, base = 2)
         moments = moment(r, moment = [2, 3, 4])
@@ -386,7 +385,7 @@ def calculate_sobol_indices_features(
       sampling_coefficient: int = 10000,
       n_bins: int = 20,
       min_obs_per_bin_factor: float = 1.5,
-      seed: Optional[int] = None) -> Dict[str, Union[int, float]]:
+      seed: Optional[Union[int, np.random.Generator]] = None) -> Dict[str, Union[int, float]]:
       """Calculation of Sobol Indices, Fitness- and State-Distribution features.
       These features consists of Sobol method as well as extracting distribution moments of raw samples as well as histogram structures.
 
@@ -431,10 +430,9 @@ def calculate_sobol_indices_features(
       """      
       start_time = time.monotonic()
       lower_bound, upper_bound = _transform_bounds_to_canonical(dim, lower_bound, upper_bound)
-      if seed is not None:
-            np.random.seed(seed)
+      rng = np.random.default_rng(seed)
 
-      X = create_initial_sample(dim, n = sampling_coefficient * (dim + 2), lower_bound = lower_bound, upper_bound = upper_bound, sample_type = 'sobol', seed = seed)
+      X = create_initial_sample(dim, n = sampling_coefficient * (dim + 2), lower_bound = lower_bound, upper_bound = upper_bound, sample_type = 'sobol', seed = rng)
       y = X.apply(lambda x: f(x.values), axis = 1).values
 
       ## A. Metrics based on Sobol Indices
