@@ -338,7 +338,10 @@ def calculate_length_scales_features(
       result = []
       nfev = 0
       for _ in range(budget_factor_per_dim * (dim ** 2)):
-            x = _levy_random_walk(x, seed = seed)
+            # No seed here: the global RNG is seeded once above, so each step
+            # continues that stream. Passing the seed re-created it on every
+            # iteration, which made every step of the walk identical.
+            x = _levy_random_walk(x)
             x = np.array([np.clip(x[i], bounds[i][0], bounds[i][1]) for i in range(len(x))])
             fval = f(x)
             nfev += 1
@@ -346,8 +349,11 @@ def calculate_length_scales_features(
       result = np.array(result)
       r_dist = pdist(result[:, :dim])
       r_fval = pdist(result[:, dim].reshape(len(result), 1), metric = 'cityblock')
-      r = np.divide(r_fval, r_dist, where=r_dist != 0)
-      r = r[~np.isnan(r)]
+      # out= matters: without it, np.divide leaves the entries skipped by where=
+      # as uninitialised memory, which can be anything, inf included. Pairs of
+      # identical points, distance zero, have no defined ratio and are dropped.
+      r = np.divide(r_fval, r_dist, out = np.full_like(r_fval, np.nan), where = r_dist != 0)
+      r = r[np.isfinite(r)]
 
       if np.cov(r) != np.inf or np.cov(r) != np.nan:
         kernel = gaussian_kde(r)
