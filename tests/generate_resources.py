@@ -1,16 +1,34 @@
+import os
 import sys
-sys.path.append("../pflacco")
+
+# Run from anywhere: put the repository root, i.e. the parent of tests/, on the
+# path. The previous "../pflacco" only resolved because the checkout happens to
+# sit in a directory of the same name.
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from pflacco.classical_ela_features import *
 from pflacco.misc_features import *
 from pflacco.sampling import * 
 from pflacco.local_optima_network_features import *
 import os
+import platform
 import pandas as pd
 from ioh import get_problem, ProblemClass
 
 DIMS = [2, 5, 10]
 RSC = os.path.join('tests', 'resources')
+
+# The feature fixtures are platform specific, exactly as the test modules expect
+# them to be. The samples in RSC itself are not and are therefore left alone
+# unless gen_sample() is called explicitly.
+if platform.system() == 'Windows':
+    RSC_PLATFORM = os.path.join(RSC, 'windows')
+elif platform.system() == 'Linux':
+    RSC_PLATFORM = os.path.join(RSC, 'linux')
+elif platform.system() == 'Darwin':
+    RSC_PLATFORM = os.path.join(RSC, 'darwin')
+else:
+    raise RuntimeError('Could not determine the system platform and therefore not write the appropriate test files.')
 
 x_samples = pd.read_pickle(os.path.join(RSC, 'init_sample.pkl'))
 
@@ -52,7 +70,7 @@ def gen_classical_features():
     result = pd.concat(result).reset_index(drop=True)
     result = result[result.columns[~result.columns.str.contains('costs_runtime')]]
     result = result.sort_values(by = ['fid', 'dim']).reset_index(drop = True)
-    result.to_pickle(os.path.join(RSC, 'test_classical_ela_features.pkl'))
+    result.to_pickle(os.path.join(RSC_PLATFORM, 'test_classical_ela_features.pkl'))
 
 def gen_misc_features():
     result = []
@@ -74,7 +92,7 @@ def gen_misc_features():
     result = pd.concat(result).reset_index(drop=True)
     result = result[result.columns[~result.columns.str.contains('costs_runtime')]]
     result = result.sort_values(by = ['fid', 'dim']).reset_index(drop = True)
-    result.to_pickle(os.path.join(RSC, 'test_misc_ela_features.pkl'))
+    result.to_pickle(os.path.join(RSC_PLATFORM, 'test_misc_ela_features.pkl'))
 
 def gen_lon_features():
     result = []
@@ -91,7 +109,7 @@ def gen_lon_features():
     result = pd.concat(result).reset_index(drop=True)
     result = result[result.columns[~result.columns.str.contains('costs_runtime')]]
     result = result.sort_values(by = ['fid', 'dim']).reset_index(drop = True)
-    result.to_pickle(os.path.join(RSC, 'test_lon_features.pkl'))
+    result.to_pickle(os.path.join(RSC_PLATFORM, 'test_lon_features.pkl'))
 
 
 ####################
@@ -149,16 +167,19 @@ def gen_cell_features():
     result = pd.concat(result).reset_index(drop=True)
     result = result[result.columns[~result.columns.str.contains('costs_runtime')]]
     result = result.sort_values(by = ['fid', 'dim']).reset_index(drop = True)
-    result.to_pickle(os.path.join(RSC, 'test_cm_ela_features.pkl'))
+    result.to_pickle(os.path.join(RSC_PLATFORM, 'test_cm_ela_features.pkl'))
 
 
 
 
 
 gen_classical_features()
-gen_sample()
 gen_cell_features()
 gen_misc_features()
+gen_lon_features()
+# gen_sample() is deliberately not called: the samples in tests/resources are
+# platform independent and regenerating them would invalidate every feature
+# fixture of every platform.
+#gen_sample()
 #ls_investigation()
-#gen_lon_features()
 #lon_investigation()
