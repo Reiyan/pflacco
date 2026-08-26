@@ -213,14 +213,16 @@ def test_calculate_information_content(x_samples, feature_values):
 def test_calculate_cm_angle(x_samples, cm_feature_values):
     result = []
     for fid in range(1,25):
-        for dim in [2, 3, 5]:
-            force = False
-            if dim == 5:
-                force = True
+        # dim 5 is deliberately absent: 3^5 = 243 cells for 250 observations leaves
+        # exactly one cell with enough points to determine a 5-dimensional linear
+        # model, so the limo coefficients there are the minimum-norm solution of a
+        # rank-deficient system and change with the LAPACK build. The block guard
+        # rejects that grid anyway, it only ran because force was set.
+        for dim in [2, 3]:
             tmp = x_samples.iloc[:(dim*50), :dim]
             f = get_problem(fid, 1, dim)
             y = tmp.apply(lambda x: f(x.values), axis = 1)
-            features = calculate_cm_angle(tmp, y, lower_bound = -5, upper_bound = 5, blocks = 3, force = force)
+            features = calculate_cm_angle(tmp, y, lower_bound = -5, upper_bound = 5, blocks = 3)
             data = pd.DataFrame(features, index = [0])
             data['fid'] = fid
             data['dim'] = dim
@@ -232,14 +234,16 @@ def test_calculate_cm_angle(x_samples, cm_feature_values):
 def test_calculate_cm_conv(x_samples, cm_feature_values):
     result = []
     for fid in range(1,25):
-        for dim in [2, 3, 5]:
-            force = False
-            if dim == 5:
-                force = True
+        # dim 5 is deliberately absent: 3^5 = 243 cells for 250 observations leaves
+        # exactly one cell with enough points to determine a 5-dimensional linear
+        # model, so the limo coefficients there are the minimum-norm solution of a
+        # rank-deficient system and change with the LAPACK build. The block guard
+        # rejects that grid anyway, it only ran because force was set.
+        for dim in [2, 3]:
             tmp = x_samples.iloc[:(dim*50), :dim]
             f = get_problem(fid, 1, dim)
             y = tmp.apply(lambda x: f(x.values), axis = 1)
-            features = calculate_cm_conv(tmp, y, lower_bound = -5, upper_bound = 5, blocks = 3, force = force)
+            features = calculate_cm_conv(tmp, y, lower_bound = -5, upper_bound = 5, blocks = 3)
             data = pd.DataFrame(features, index = [0])
             data['fid'] = fid
             data['dim'] = dim
@@ -251,14 +255,16 @@ def test_calculate_cm_conv(x_samples, cm_feature_values):
 def test_calculate_cm_grad(x_samples, cm_feature_values):
     result = []
     for fid in range(1,25):
-        for dim in [2, 3, 5]:
-            force = False
-            if dim == 5:
-                force = True
+        # dim 5 is deliberately absent: 3^5 = 243 cells for 250 observations leaves
+        # exactly one cell with enough points to determine a 5-dimensional linear
+        # model, so the limo coefficients there are the minimum-norm solution of a
+        # rank-deficient system and change with the LAPACK build. The block guard
+        # rejects that grid anyway, it only ran because force was set.
+        for dim in [2, 3]:
             tmp = x_samples.iloc[:(dim*50), :dim]
             f = get_problem(fid, 1, dim)
             y = tmp.apply(lambda x: f(x.values), axis = 1)
-            features = calculate_cm_grad(tmp, y, lower_bound = -5, upper_bound = 5, blocks = 3, force = force)
+            features = calculate_cm_grad(tmp, y, lower_bound = -5, upper_bound = 5, blocks = 3)
             data = pd.DataFrame(features, index = [0])
             data['fid'] = fid
             data['dim'] = dim
@@ -270,14 +276,16 @@ def test_calculate_cm_grad(x_samples, cm_feature_values):
 def test_calculate_limo(x_samples, cm_feature_values):
     result = []
     for fid in range(1,25):
-        for dim in [2, 3, 5]:
-            force = False
-            if dim == 5:
-                force = True
+        # dim 5 is deliberately absent: 3^5 = 243 cells for 250 observations leaves
+        # exactly one cell with enough points to determine a 5-dimensional linear
+        # model, so the limo coefficients there are the minimum-norm solution of a
+        # rank-deficient system and change with the LAPACK build. The block guard
+        # rejects that grid anyway, it only ran because force was set.
+        for dim in [2, 3]:
             tmp = x_samples.iloc[:(dim*50), :dim]
             f = get_problem(fid, 1, dim)
             y = tmp.apply(lambda x: f(x.values), axis = 1)
-            features = calculate_limo(tmp, y, lower_bound = -5, upper_bound = 5, blocks = 3, force = force)
+            features = calculate_limo(tmp, y, lower_bound = -5, upper_bound = 5, blocks = 3)
             data = pd.DataFrame(features, index = [0])
             data['fid'] = fid
             data['dim'] = dim
