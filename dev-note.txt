@@ -13,5 +13,36 @@ Fixed Issues, reported by Claude:
 1: scipy.cluster.hierarchy._order_cluster_tree removed (not needed)
 2: np.product removed in numpy 2
 3: Positional access in _create_blocks
-4: Dead code in _calculate_num_derivate
+4: Dead code in _calculate_num_derivate (commented out)
 5: _create_blocks never validates its input
+6: calculate_length_scales_features re-seeded the levy walk on every
+   iteration, so with a seed set every step had the identical direction and
+   length. The walk did not walk.
+7: The same function divided with np.divide(..., where=...) and no out=,
+   so pairs of identical points left uninitialised memory in the result.
+   That value reached the KDE, the entropy and every moment, and could be
+   inf, which crashed the feature set outright.
+8: requirements pinned pyDOE<1.0, but from 0.4.0 the sampler ignores
+   np.random.seed. A fresh install resolved to 0.9.9 and silently returned
+   an unseeded latin hypercube. The cap is now <0.4.
+9: generate_resources.py wrote the fixtures next to the platform folders
+   instead of into them, never regenerated the lon fixture, and only found
+   the package because the checkout sits in a directory of the same name.
+
+Dependencies and CI:
+- upper version bounds removed, lower bounds unchanged, so a 1.2.2
+  environment still satisfies this release. Verified against the 1.2.2
+  versions and against the current ones.
+- ioh 0.3.8 cannot be built on Python 3.12, the test requirement moved.
+- both workflows ran on Python 3.8, where the suite cannot even install.
+  They now run 3.10 and 3.12, and the resource generation workflow covers
+  windows as well.
+
+Test fixtures:
+- darwin and linux regenerated and verified on both.
+- windows is still from 2023 and needs one dispatch of gen-test-rsc.yml.
+- ela_curv.hessian_cond is excluded from the value comparison: on a
+  numerically singular Hessian the condition number reaches 1e27 and every
+  aggregation of it changes with the library version.
+- the cell mapping tests dropped dim 5, where only 1 of 243 cells held
+  enough observations to fit the model.
