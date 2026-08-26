@@ -148,18 +148,16 @@ def ls_investigation():
 def gen_cell_features():
     result = []
     for fid in range(1,25):
-        for dim in [2, 3, 5]:
-            force = False
+        # dim 5 is deliberately absent, see test_calculate_cm_angle
+        for dim in [2, 3]:
             n = dim * 50
-            if dim == 5:
-                force = True
             tmp = x_samples.iloc[:n, :dim]
             f = get_problem(fid, 1, dim, ProblemClass.BBOB)
             y = tmp.apply(lambda x: f(x.values), axis = 1)
-            cm_angle = calculate_cm_angle(tmp, y, lower_bound = -5, upper_bound = 5, blocks = 3, force = force)
-            cm_conv = calculate_cm_conv(tmp, y, lower_bound = -5, upper_bound = 5, blocks = 3, force = force)
-            cm_grad = calculate_cm_grad(tmp, y, lower_bound = -5, upper_bound = 5, blocks = 3, force = force)
-            limo = calculate_limo(tmp, y, lower_bound = -5, upper_bound = 5, blocks = 3, force = force)
+            cm_angle = calculate_cm_angle(tmp, y, lower_bound = -5, upper_bound = 5, blocks = 3)
+            cm_conv = calculate_cm_conv(tmp, y, lower_bound = -5, upper_bound = 5, blocks = 3)
+            cm_grad = calculate_cm_grad(tmp, y, lower_bound = -5, upper_bound = 5, blocks = 3)
+            limo = calculate_limo(tmp, y, lower_bound = -5, upper_bound = 5, blocks = 3)
 
             data = pd.DataFrame({**cm_angle, **cm_conv, **cm_grad, **limo, **{'fid':fid}, **{'dim':dim}}, index = [0])
             result.append(data)
