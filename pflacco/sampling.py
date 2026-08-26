@@ -1,114 +1,127 @@
+
 import numpy as np
 import pandas as pd
-
 from pydoe import lhs
+from scipy.optimize import minimize as scipy_minimize
 from scipy.stats import levy
 from scipy.stats.qmc import Sobol
-from scipy.optimize import minimize as scipy_minimize
-from typing import List, Optional, Union
 
 from .utils import _transform_bounds_to_canonical
 
+
 def create_initial_sample(
-      dim: int,
-      n: Optional[int] = None,
-      sample_coefficient: int = 50,
-      lower_bound: Union[List[float], float] = 0,
-      upper_bound: Union[List[float], float] = 1,
-      sample_type: str = 'lhs',
-      categorical_values: Optional[List[Union[str, List[str]]]] = None,
-      seed: Optional[Union[int, np.random.Generator]] = None) -> pd.DataFrame:
-      """Sampling of the decision space.
+    dim: int,
+    n: int | None = None,
+    sample_coefficient: int = 50,
+    lower_bound: list[float] | float = 0,
+    upper_bound: list[float] | float = 1,
+    sample_type: str = "lhs",
+    categorical_values: list[str | list[str]] | None = None,
+    seed: int | np.random.Generator | None = None,
+) -> pd.DataFrame:
+    """Sampling of the decision space.
 
-      Parameters
-      ----------
-      dim : int
-          Dimensionality of the search space.
-      n : Optional[int], optional
-          Fixed number of samples to create. In ELA, this is typically scaled 
-          to the dimensionalty of the problem, e.g., ``n=50*dim``, by default None.
-      sample_coefficient : int, optional
-          Factor which is used to determine the sample size in conjuction
-          with the problem dimensionality, by default 50.
-      lower_bound : Union[List[float], float], optional
-          Lower bound of variables of the decision space.
-          In case of mixed search spaces values at the index of the categorical
-          variables will be ignored, by default 0.
-      upper_bound : Union[List[float], float], optional
-          Upper bound of variables of the decision space.
-           In case of mixed search spaces values at the index of the categorical
-          variables will be ignored, by default 1.
-      sample_type : str, optional
-          Type of sampling strategy. Should be one of ('lhs', 'random', 'sobol'), by default 'lhs'.
-      categorical_values : Optional[List[List[str]]], optional
-          List of the variable types of the decision space.
-          Continuous variables are abbreviated as 'cont', integer as 'int' and categorical variables
-          are represented by a list of their respective values. E.g. for a search space with a continuous, an integer 
-          and a categorical variable the input could look like this ['cont', 'int', ['val1', 'val2']].
-          Note, that the order is important, by default None.
-      seed : Optional[int], optional
-          Seed for reproducability, by default None.
+    Parameters
+    ----------
+    dim : int
+        Dimensionality of the search space.
+    n : Optional[int], optional
+        Fixed number of samples to create. In ELA, this is typically scaled
+        to the dimensionalty of the problem, e.g., ``n=50*dim``, by default None.
+    sample_coefficient : int, optional
+        Factor which is used to determine the sample size in conjuction
+        with the problem dimensionality, by default 50.
+    lower_bound : Union[List[float], float], optional
+        Lower bound of variables of the decision space.
+        In case of mixed search spaces values at the index of the categorical
+        variables will be ignored, by default 0.
+    upper_bound : Union[List[float], float], optional
+        Upper bound of variables of the decision space.
+         In case of mixed search spaces values at the index of the categorical
+        variables will be ignored, by default 1.
+    sample_type : str, optional
+        Type of sampling strategy. Should be one of ('lhs', 'random', 'sobol'), by default 'lhs'.
+    categorical_values : Optional[List[List[str]]], optional
+        List of the variable types of the decision space.
+        Continuous variables are abbreviated as 'cont', integer as 'int' and categorical variables
+        are represented by a list of their respective values. E.g. for a search space with a continuous, an integer
+        and a categorical variable the input could look like this ['cont', 'int', ['val1', 'val2']].
+        Note, that the order is important, by default None.
+    seed : Optional[int], optional
+        Seed for reproducability, by default None.
 
-      Returns
-      -------
-      pd.DataFrame
-          `n` x `dim` shaped Pandas dataframe containing the different samples.
-      """      
+    Returns
+    -------
+    pd.DataFrame
+        `n` x `dim` shaped Pandas dataframe containing the different samples.
+    """
 
-      if sample_type not in ['lhs', 'random', 'sobol']:
-            raise ValueError('Unknown sample type selected. Valid options are "lhs", "sobol", and "random"')
-      if categorical_values is not None and sample_type != 'random':
-            raise NotImplementedError('Currently, only "random" sampling is enabled for mixed search spaces.')
-      if not isinstance(lower_bound, list) and type(lower_bound) is not np.ndarray:
-            lower_bound = np.array([lower_bound] * dim)
-      if isinstance(lower_bound, list):
-            lower_bound = np.array(lower_bound)
-      
-      if not isinstance(upper_bound, list) and type(upper_bound) is not np.ndarray:
-            upper_bound = np.array([upper_bound] * dim)
-      if isinstance(upper_bound, list):
-            upper_bound = np.array(upper_bound)
+    if sample_type not in ["lhs", "random", "sobol"]:
+        raise ValueError('Unknown sample type selected. Valid options are "lhs", "sobol", and "random"')
+    if categorical_values is not None and sample_type != "random":
+        raise NotImplementedError('Currently, only "random" sampling is enabled for mixed search spaces.')
+    if not isinstance(lower_bound, list) and type(lower_bound) is not np.ndarray:
+        lower_bound = np.array([lower_bound] * dim)
+    if isinstance(lower_bound, list):
+        lower_bound = np.array(lower_bound)
 
-      if len(lower_bound) != dim or len(upper_bound) != dim:
-            raise ValueError('Length of lower-/upper bound is not the same as the problem dimension')
-      
-      if not (lower_bound < upper_bound).all():
-            raise ValueError('Not all elements of lower bound are smaller than upper bound')
+    if not isinstance(upper_bound, list) and type(upper_bound) is not np.ndarray:
+        upper_bound = np.array([upper_bound] * dim)
+    if isinstance(upper_bound, list):
+        upper_bound = np.array(upper_bound)
 
-      if n is None:
-            n = dim * sample_coefficient
+    if len(lower_bound) != dim or len(upper_bound) != dim:
+        raise ValueError("Length of lower-/upper bound is not the same as the problem dimension")
 
-      if categorical_values is not None:
-            cat_idx = [x for x in range(len(categorical_values)) if type(categorical_values[x]) is list]
-            int_idx = [x for x in range(len(categorical_values)) if categorical_values[x] == 'int']
+    if not (lower_bound < upper_bound).all():
+        raise ValueError("Not all elements of lower bound are smaller than upper bound")
 
-      # np.random.default_rng accepts an int, an existing Generator, which it
-      # passes through unchanged, or None for a fresh unpredictable one.
-      rng = np.random.default_rng(seed)
+    if n is None:
+        n = dim * sample_coefficient
 
-      if sample_type == 'lhs':
-            X = lhs(dim, samples = n, seed = rng)
-      elif sample_type == 'sobol':
-            sampler = Sobol(d = dim, seed = rng)
-            X = sampler.random(n)
-      else:
-            X = rng.random((n, dim))
-      
-      if categorical_values is None:
-            X = X * (upper_bound - lower_bound) + lower_bound
-      else:
-            X = X.transpose().tolist()
-            for i in cat_idx:
-                  X[i] = rng.choice(categorical_values[i], n)
-            for i in int_idx:
-                  X[i] = rng.integers(lower_bound[i], upper_bound[i] + 1, n)
-            X = np.array(X).transpose()
-            
-      colnames = ['x' + str(x) for x in range(dim)]
-      
-      return pd.DataFrame(X, columns = colnames)
+    if categorical_values is not None:
+        cat_idx = [x for x in range(len(categorical_values)) if type(categorical_values[x]) is list]
+        int_idx = [x for x in range(len(categorical_values)) if categorical_values[x] == "int"]
 
-def _create_local_search_sample(f, dim, lower_bound, upper_bound, n_runs = 100, budget_factor_per_run=1000, method = 'L-BFGS-B', minimize = True, seed = None, x0 = None):
+    # np.random.default_rng accepts an int, an existing Generator, which it
+    # passes through unchanged, or None for a fresh unpredictable one.
+    rng = np.random.default_rng(seed)
+
+    if sample_type == "lhs":
+        X = lhs(dim, samples=n, seed=rng)
+    elif sample_type == "sobol":
+        sampler = Sobol(d=dim, seed=rng)
+        X = sampler.random(n)
+    else:
+        X = rng.random((n, dim))
+
+    if categorical_values is None:
+        X = X * (upper_bound - lower_bound) + lower_bound
+    else:
+        X = X.transpose().tolist()
+        for i in cat_idx:
+            X[i] = rng.choice(categorical_values[i], n)
+        for i in int_idx:
+            X[i] = rng.integers(lower_bound[i], upper_bound[i] + 1, n)
+        X = np.array(X).transpose()
+
+    colnames = ["x" + str(x) for x in range(dim)]
+
+    return pd.DataFrame(X, columns=colnames)
+
+
+def _create_local_search_sample(
+    f,
+    dim,
+    lower_bound,
+    upper_bound,
+    n_runs=100,
+    budget_factor_per_run=1000,
+    method="L-BFGS-B",
+    minimize=True,
+    seed=None,
+    x0=None,
+):
     lower_bound, upper_bound = _transform_bounds_to_canonical(dim, lower_bound, upper_bound)
 
     if not minimize:
@@ -116,26 +129,23 @@ def _create_local_search_sample(f, dim, lower_bound, upper_bound, n_runs = 100, 
         f = lambda x: -1 * original_f(x)
     rng = np.random.default_rng(seed)
 
-    minimizer_kwargs = {
-        'maxfun': budget_factor_per_run*dim,
-        'ftol': 1e-8
-        
-    }
+    minimizer_kwargs = {"maxfun": budget_factor_per_run * dim, "ftol": 1e-8}
     bounds = list(zip(lower_bound, upper_bound))
     result = []
     nfval = 0
     for _ in range(n_runs):
-        x0 = rng.uniform(low = lower_bound, high = upper_bound, size = dim)
-        opt_result = scipy_minimize(f, x0, method = method, bounds = bounds, options = minimizer_kwargs)
+        x0 = rng.uniform(low=lower_bound, high=upper_bound, size=dim)
+        opt_result = scipy_minimize(f, x0, method=method, bounds=bounds, options=minimizer_kwargs)
         result.append(np.append(opt_result.x, [opt_result.fun]))
         nfval += opt_result.nfev
 
     return np.array(result), nfval
 
-def _levy_random_walk(x, loc = 0, scale = 10**-3, seed = None):
-      rng = np.random.default_rng(seed)
-      vec = rng.normal(0, 1, len(x))
-      norm_vec = vec/(np.sqrt((vec ** 2).sum()))
-      step_size = levy.rvs(size = 1, loc = loc, scale = scale, random_state = rng)
 
-      return x + step_size * norm_vec 
+def _levy_random_walk(x, loc=0, scale=10**-3, seed=None):
+    rng = np.random.default_rng(seed)
+    vec = rng.normal(0, 1, len(x))
+    norm_vec = vec / (np.sqrt((vec**2).sum()))
+    step_size = levy.rvs(size=1, loc=loc, scale=scale, random_state=rng)
+
+    return x + step_size * norm_vec

@@ -52,15 +52,17 @@ from pflacco.classical_ela_features import calculate_ela_distribution
 from pflacco.misc_features import calculate_fitness_distance_correlation
 from pflacco.local_optima_network_features import compute_local_optima_network, calculate_lon_features
 
+
 # Arbitrary objective function
 def objective_function(x):
-    return x[0]**2 - x[1]**2
+    return x[0] ** 2 - x[1] ** 2
+
 
 dim = 2
 # Create inital sample using latin hyper cube sampling
-X = create_initial_sample(dim, sample_type = 'lhs')
+X = create_initial_sample(dim, sample_type="lhs")
 # Calculate the objective values of the initial sample using an arbitrary objective function (here y = x1^2 - x2^2)
-y = X.apply(lambda x: objective_function(x), axis = 1)
+y = X.apply(lambda x: objective_function(x), axis=1)
 
 # Compute an exemplary feature set from the convential ELA features of the R-package flacco
 ela_distr = calculate_ela_distribution(X, y)
@@ -74,7 +76,6 @@ print(fdc)
 nodes, edges = compute_local_optima_network(f=objective_function, dim=dim, lower_bound=0, upper_bound=1)
 lon = calculate_lon_features(nodes, edges)
 print(lon)
-
 ```
 
 It is also possible to include objective functions provided by other packages such as ```COCO``` and ```ioh```.
@@ -99,21 +100,23 @@ for problem in suite:
     iid = problem.id_instance
 
     # Create sample
-    X = create_initial_sample(dim, lower_bound = -5, upper_bound = 5)
-    y = X.apply(lambda x: problem(x), axis = 1)
+    X = create_initial_sample(dim, lower_bound=-5, upper_bound=5)
+    y = X.apply(lambda x: problem(x), axis=1)
 
     # Calculate ELA features
     ela_meta = calculate_ela_meta(X, y)
     ela_distr = calculate_ela_distribution(X, y)
     nbc = calculate_nbc(X, y)
     disp = calculate_dispersion(X, y)
-    ic = calculate_information_content(X, y, seed = 100)
+    ic = calculate_information_content(X, y, seed=100)
 
     # Store results in pandas dataframe
-    data = pd.DataFrame({**ic, **ela_meta, **ela_distr, **nbc, **disp, **{'fid': fid}, **{'dim': dim}, **{'iid': iid}}, index = [0])
+    data = pd.DataFrame(
+        {**ic, **ela_meta, **ela_distr, **nbc, **disp, **{"fid": fid}, **{"dim": dim}, **{"iid": iid}}, index=[0]
+    )
     features.append(data)
 
-features = pd.concat(features).reset_index(drop = True)
+features = pd.concat(features).reset_index(drop=True)
 ```
 
 ## IOH Example
@@ -127,15 +130,15 @@ from ioh import get_problem, ProblemType
 
 features = []
 # Get all 24 single-objective noiseless BBOB function in dimension 2 and 3 for the first five instances.
-for fid in range(1,25):
+for fid in range(1, 25):
     for dim in [2, 3]:
         for iid in range(1, 6):
             # Get optimization problem
-            problem = get_problem(fid, iid, dim, problem_type = ProblemType.BBOB)
+            problem = get_problem(fid, iid, dim, problem_type=ProblemType.BBOB)
 
             # Create sample
-            X = create_initial_sample(dim, lower_bound = -5, upper_bound = 5)
-            y = X.apply(lambda x: problem(x), axis = 1)
+            X = create_initial_sample(dim, lower_bound=-5, upper_bound=5)
+            y = X.apply(lambda x: problem(x), axis=1)
 
             # Calculate ELA features
             ela_meta = calculate_ela_meta(X, y)
@@ -143,13 +146,16 @@ for fid in range(1,25):
             ela_level = calculate_ela_level(X, y)
             nbc = calculate_nbc(X, y)
             disp = calculate_dispersion(X, y)
-            ic = calculate_information_content(X, y, seed = 100)
+            ic = calculate_information_content(X, y, seed=100)
 
             # Store results in pandas dataframe
-            data = pd.DataFrame({**ic, **ela_meta, **ela_distr, **nbc, **disp, **{'fid': fid}, **{'dim': dim}, **{'iid': iid}}, index = [0])
+            data = pd.DataFrame(
+                {**ic, **ela_meta, **ela_distr, **nbc, **disp, **{"fid": fid}, **{"dim": dim}, **{"iid": iid}},
+                index=[0],
+            )
             features.append(data)
 
-features = pd.concat(features).reset_index(drop = True)
+features = pd.concat(features).reset_index(drop=True)
 ```
 
 ## Citation
