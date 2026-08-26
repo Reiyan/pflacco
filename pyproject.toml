@@ -1,0 +1,50 @@
+[project]
+name = "pflacco"
+version = "1.2.2"
+description = "A Python implementation and extension to the R package flacco for computing ELA features."
+authors = [{name = "Raphael Patrick Prager", email = "raphael.prager@gmx.de"}]
+readme = "Readme.md"
+license = "MIT"
+requires-python = ">=3.10"
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Operating System :: OS Independent",
+]
+dependencies = [
+  "numpy>=1.24.3",
+  "scikit-learn>=1.2.2",
+  "pydoe>=1.5",
+  "scipy>=1.10.1",
+  "pandas>=1.4.0",
+  "numdifftools>=0.9.40",
+  "SALib>=1.4.5",
+]
+
+[project.urls]
+homepage = "https://pypi.org/project/pflacco/"
+source = "https://github.com/Reiyan/pflacco"
+documentation = "https://pflacco.readthedocs.io/en/latest/index.html"
+
+[project.optional-dependencies]
+dev = [
+  "ioh>=0.3.10",
+  "pytest>=7.2.0",
+  "ruff>=0.15.11",
+]
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.ruff.lint.isort]
+force-single-line = true
+
+[build-system]
+requires = ["uv_build>=0.8,<0.11"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "pflacco"
+module-root = ""
