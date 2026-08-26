@@ -12,6 +12,7 @@ And now it also provides a native Python implementation with additional features
 - [Analysing and characterising optimization problems using length scale](https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.709.9948&rep=rep1&type=pdf).
 - [Fitness Landscape Analysis Metrics based on Sobol Indices and Fitness-and State-Distributions.](https://ieeexplore.ieee.org/document/9185716).
 - [Local optima networks for continuous fitness landscapes](https://dl.acm.org/doi/10.1145/3319619.3326852)
+- [Nullifying the Inherent Bias of Non-invariant Exploratory Landscape Analysis Features](https://link.springer.com/chapter/10.1007/978-3-031-30229-9_27), the objective normalization behind the `normalize` parameter.
 
 The following is the description of the original flacco package:
 > flacco is a collection of features for Explorative Landscape Analysis (ELA) of single-objective, continuous (Black-Box-)Optimization Problems. It allows the user to quantify characteristics of an (unknown) optimization problem's landscape.

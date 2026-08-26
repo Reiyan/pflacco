@@ -9,8 +9,8 @@ authors:
     email: "raphael.prager@uni-muenster.de"
   - family-names: "Trautmann"
     given-names: "Heike"
-version: 1.2.2
-date-released: "2023-08-25"
+version: 1.2.3
+date-released: "2026-08-26"
 license: MIT
 repository-code: "https://github.com/Reiyan/pflacco"
 url: "https://pflacco.readthedocs.io/en/latest/index.html"
@@ -36,3 +36,20 @@ preferred-citation:
   issn: "1063-6560"
   doi: "10.1162/evco_a_00341"
   url: "https://doi.org/10.1162/evco_a_00341"
+references:
+  - type: conference-paper
+    title: "Nullifying the Inherent Bias of Non-invariant Exploratory Landscape Analysis Features"
+    authors:
+      - family-names: "Prager"
+        given-names: "Raphael Patrick"
+      - family-names: "Trautmann"
+        given-names: "Heike"
+    collection-title: "Applications of Evolutionary Computation - EvoApplications 2023"
+    publisher:
+      name: "Springer Nature Switzerland"
+    year: 2023
+    start: 411
+    end: 425
+    doi: "10.1007/978-3-031-30229-9_27"
+    url: "https://link.springer.com/chapter/10.1007/978-3-031-30229-9_27"
+
