@@ -46,3 +46,17 @@ Test fixtures:
   aggregation of it changes with the library version.
 - the cell mapping tests dropped dim 5, where only 1 of 243 cells held
   enough observations to fit the model.
+
+Additionally in 1.3.0 (this branch):
+#23: removed the unused calculate_ela_curvate arguments delta, eps,
+     zero_tol, lower_bound and upper_bound. API BREAK, every caller passes
+     the bounds positionally today.
+#19: objective normalization is now the default, so every affected feature
+     changes value.
+#31: numpy Generator instead of the legacy global seed. seed now accepts an
+     int or a Generator, and nothing touches the global RNG. This also
+     revealed that calculate_nbc had no seed at all although its default tie
+     breaker draws randomly.
+pyDOE was replaced by pydoe. Its lhs ignores np.random.seed and needs the
+     seed passed explicitly, so recorded seeds do not reproduce across the
+     switch. requires-python is now >=3.10, pandas >=1.4.
