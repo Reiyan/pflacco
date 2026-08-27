@@ -33,6 +33,11 @@ def _calculate_num_derivate(f, lower_bound, upper_bound, delta, eps, zero_tol, x
       #side = np.array([np.nan if x == 0 else x for x in side])
 
       grad = np.abs(Gradient(f, method = 'central')(x))
+      # The norm of the gradient. The previous sqrt(np.sum(gr_scale) ** 2) was
+      # applied to a scalar and therefore collapsed to abs(gr_scale), i.e. it
+      # reported the gradient scale a second time. Reported by Shuhei Tanaka,
+      # Fukuchiyama University, in "Calculation of curvature in pflacco",
+      # 18 June 2024.
       gr_norm = np.sqrt(np.sum(grad ** 2))
       if grad.min() > 0:
             gr_scale = grad.max()/grad.min()
@@ -1499,6 +1504,11 @@ def calculate_ela_curvate(
 
       wfunc = partial(_calculate_num_derivate, f, lower_bound, upper_bound, delta, eps, zero_tol)
       derivs = X.sample(N).apply(lambda x: wfunc(x.values), axis = 1)
+      # Transpose, not reshape. The array holds one row per sample point, while
+      # the aggregations below index it by feature. reshape(3, n) produces the
+      # same shape but reads the buffer row-major, interleaving the three
+      # features. Reported by Shuhei Tanaka, Fukuchiyama University, in
+      # "Calculation of curvature in pflacco", 18 June 2024.
       derivs = np.array([x for x in derivs]).T
       
       return {
