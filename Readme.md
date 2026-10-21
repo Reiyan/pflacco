@@ -2,6 +2,12 @@
 # pflacco: The R-package flacco in native Python code
 For people who are not comfortable with R.
 
+> **Note:** Two upcoming releases are available for testing on separate branches. We recommend using one of them instead of this branch:
+> - [`dev-1.2.3`](https://github.com/Reiyan/pflacco/tree/dev-1.2.3): bug fixes only, compatible with 1.2.2.
+> - [`dev-1.3.0`](https://github.com/Reiyan/pflacco/tree/dev-1.3.0): additionally contains changes that alter function signatures and seeded results.
+>
+> Install with e.g. `pip install git+https://github.com/Reiyan/pflacco.git@dev-1.3.0`. Feedback is welcome at moritz.seiler@uni-paderborn.de.
+
 ## Summary
 Feature-based landscape analysis of continuous and constrained optimization problems is now available in Python as well.
 This package provides a python interface to the R package [flacco](https://github.com/kerschke/flacco) by Pascal Kerschke in version v0.4.0.
